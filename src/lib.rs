@@ -1,10 +1,10 @@
 use std::collections::{BTreeMap, HashMap};
 
 use bytepair::BytePair;
-use vocab::Vocab;
 
 pub mod bytepair;
 pub mod vocab;
+pub mod vocab_loader;
 
 pub struct Tokenizer {
     vocab: BTreeMap<BytePair, u64>,
