@@ -36,7 +36,7 @@ impl BytePair {
             return false;
         }
 
-        for ix in 0..self.length {
+        for ix in 0..x.len() {
             if x[ix] != self.inner[ix] {
                 return false;
             }
@@ -67,8 +67,10 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+    fn bytepair_compare_0() {
+        let bytepair = BytePair::from_slice(&[1, 2, 3]).unwrap();
+        assert_eq!(bytepair.compare(&[1]), false);
+        assert_eq!(bytepair.compare(&[1, 2, 3]), true);
+        assert_eq!(bytepair.compare(&[1, 2, 3, 4, 5, 6, 7, 8, 9]), false);
     }
 }
