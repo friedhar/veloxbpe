@@ -1,7 +1,9 @@
 pub struct Tokenizer {
     vocab: Vocab,
 }
-pub struct Vocab {}
+pub struct Vocab {
+    inner: (),
+}
 
 impl Tokenizer {
     pub fn new(vocab: Vocab) -> Tokenizer {
@@ -10,6 +12,9 @@ impl Tokenizer {
 
     pub fn encode(&self, x: &str) -> Vec<u8> {
         let mut o: Vec<u8> = Vec::with_capacity(x.len());
+        let bytes = x.bytes();
+
+        o
     }
 }
 
