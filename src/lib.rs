@@ -15,15 +15,20 @@ impl Tokenizer {
         Tokenizer { vocab }
     }
 
-    pub fn encode(&self, x: &str) -> Vec<u8> {
-        let mut o: Vec<u8> = Vec::with_capacity(x.len());
-        let mut bytes: Vec<u8> = x.bytes().collect();
+    pub fn encode(&self, x: &str) -> Vec<u64> {
+        let mut o: Vec<u64> = Vec::with_capacity(x.len());
+        let bytes: Vec<u8> = x.bytes().collect();
 
-        for xs in bytes.windows(2) {
-            let first = xs[0];
-            let second = xs[1];
+        let mut ix = 0;
+        while ix < bytes.len() {
+            let first = bytes[ix];
+            let second = bytes[ix + 1];
 
             let pair = self.vocab.get(&BytePair::new_pair(first, second));
+            if let Some(x) = pair {
+                ix += 2;
+                o.push(*x);
+            }
         }
 
         o
