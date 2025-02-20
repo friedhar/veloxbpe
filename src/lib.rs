@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+pub mod bytepair;
 
 const BYTEPAIR_CAPACITY: usize = 8;
 
