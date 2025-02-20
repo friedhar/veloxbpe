@@ -1,37 +1,23 @@
 pub(crate) const BYTEPAIR_CAPACITY: usize = 8;
 
+#[derive(Ord, Eq, PartialEq, PartialOrd)]
 pub struct BytePair {
-    inner: [u8; BYTEPAIR_CAPACITY],
-    length: usize,
+    pub byte1: u8,
+    pub byte2: Option<u8>,
 }
 
 impl BytePair {
-    pub fn from_slice(x: &[u8]) -> Option<BytePair> {
-        if x.len() > BYTEPAIR_CAPACITY {
-            return None;
+    pub fn new_pair(byte1: u8, byte2: u8) -> BytePair {
+        BytePair {
+            byte1,
+            byte2: Some(byte2),
         }
-        let mut inner = [0; BYTEPAIR_CAPACITY];
-        for (ix, i) in x.into_iter().enumerate() {
-            inner[ix] = *i; // u8 is cheap to copy..
-        }
-
-        Some(BytePair {
-            inner,
-            length: x.len(),
-        })
     }
 
-    pub fn compare(&self, x: &[u8]) -> bool {
-        if x.len() != self.length {
-            return false;
+    pub fn new_single(byte: u8) -> BytePair {
+        BytePair {
+            byte1: byte,
+            byte2: None,
         }
-
-        for ix in 0..x.len() {
-            if x[ix] != self.inner[ix] {
-                dbg!(&self.inner);
-                return false;
-            }
-        }
-        true
     }
 }
