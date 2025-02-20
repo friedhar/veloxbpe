@@ -1,8 +1,15 @@
-pub struct Tokenizer {}
+pub struct Tokenizer {
+    vocab: Vocab,
+}
+pub struct Vocab {}
 
 impl Tokenizer {
-    pub fn new() -> Tokenizer {
-        Tokenizer {}
+    pub fn new(vocab: Vocab) -> Tokenizer {
+        Tokenizer { vocab }
+    }
+
+    pub fn encode(&self, x: &str) -> Vec<u8> {
+        let mut o: Vec<u8> = Vec::with_capacity(x.len());
     }
 }
 
