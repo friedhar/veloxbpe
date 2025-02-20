@@ -32,12 +32,13 @@ impl BytePair {
     }
 
     pub fn compare(&self, x: &[u8]) -> bool {
-        if x.len() != BYTEPAIR_CAPACITY {
+        if x.len() != self.length {
             return false;
         }
 
         for ix in 0..x.len() {
             if x[ix] != self.inner[ix] {
+                dbg!(&self.inner);
                 return false;
             }
         }
