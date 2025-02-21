@@ -62,6 +62,12 @@ fn cache_vocab(vocab: &Vocab, id: &str) -> Result<()> {
 
 pub const VOCAB_CACHE_DIR: &str = ".veloxbpe";
 
+impl VocabLoader<O200kBase> {
+    pub fn new() -> VocabLoader<O200kBase> {
+        VocabLoader { x: O200kBase {} }
+    }
+}
+
 impl<T: VocabFetcher> VocabLoader<T> {
     pub fn load(&self) -> Result<Vocab> {
         mkdir_if_needed(VOCAB_CACHE_DIR)?;
