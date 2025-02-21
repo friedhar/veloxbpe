@@ -26,6 +26,7 @@ impl Tokenizer {
             .filter_map(|c| self.vocab.b2t.get(&SmartString::from_char(c)))
             .map(|x| *x)
             .collect();
+        let mut n = 0;
 
         loop {
             let mut new_tokens: Vec<u64> = Vec::with_capacity(tokens.len() / 2);
@@ -45,13 +46,13 @@ impl Tokenizer {
                     None => {
                         ix += 1;
                         new_tokens.push(xs[0]);
-                        new_tokens.push(xs[1]);
                     }
                 };
-                // let ctx_left = self.vocab.t2b[xs[0]];
             }
 
+            n += 1;
             tokens = new_tokens;
+
             if !modified {
                 break;
             }
@@ -87,6 +88,7 @@ mod tests {
         let vocab = vocab.load().unwrap();
 
         let source: String = vocab.b2t.iter().map(|(k, _)| k.to_string()).collect();
+        // let source = (&source[..2048]).to_string();
         let size = source.len();
 
         let tokenizer = Tokenizer::new(vocab);

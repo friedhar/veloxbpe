@@ -110,12 +110,8 @@ impl<T: VocabFetcher> VocabLoader<T> {
     fn read_cached_vocab(&self) -> Result<Vocab> {
         let mut file = File::open(self.vocab_cache_path())?;
         let mut content = Vec::new();
-        dbg!("read");
         file.read_to_end(&mut content)?;
-
-        dbg!("post_read");
         let vocab: Vocab = bincode::deserialize(content.as_slice())?;
-        dbg!("post_read2");
         Ok(vocab)
     }
 
