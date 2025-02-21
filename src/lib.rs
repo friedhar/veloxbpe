@@ -7,7 +7,7 @@ pub mod vocab_loader;
 use bytepair::BytePair;
 use rayon::prelude::*;
 use reqwest::redirect::Policy;
-use smallstring::SmartString;
+use smallstring::{SmartString, TinyString};
 use vocab::{Bytes2Token, Vocab};
 
 pub struct Tokenizer {
@@ -26,7 +26,7 @@ impl Tokenizer {
             .chars()
             .par_bridge()
             .into_par_iter()
-            .filter_map(|c| self.vocab.b2t.get(&SmartString::from_char(c)))
+            .filter_map(|c| self.vocab.b2t.get(&TinyString::from_char(c)))
             .map(|x| *x)
             .collect();
         let mut n = 0;
@@ -40,7 +40,7 @@ impl Tokenizer {
                 let xs = [tokens[ix], tokens[ix + 1]];
                 let ctx_left = &self.vocab.t2b[xs[0] as usize];
                 let ctx_right = &self.vocab.t2b[xs[0] as usize];
-                let ctx = SmartString::fuse(&ctx_left, &ctx_right);
+                let ctx = TinyString::fuse(&ctx_left, &ctx_right);
                 match self.vocab.b2t.get(&ctx) {
                     Some(x) => {
                         ix += 2;
@@ -102,6 +102,7 @@ mod tests {
         let size = source.len();
 
         let tokenizer = Tokenizer::new(vocab);
+        tokenizer.encode(&source);
         let start_t = Instant::now();
         black_box(tokenizer.encode(&source));
         let took_s = start_t.elapsed().as_micros() as f64 / 1e6 as f64;

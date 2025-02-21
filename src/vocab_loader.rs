@@ -13,7 +13,7 @@ use crate::{
     base64::base64_decode,
     bytepair::BytePair,
     smallstring::{SmartString, TinyString},
-    vocab::{Bytes2Token, Vocab},
+    vocab::{Bytes2Token, Vocab, VocabIntermidiate},
 };
 
 pub trait VocabFetcher {
@@ -47,7 +47,7 @@ impl VocabFetcher for O200kBase {
                 let k_parsed = base64_decode(&k).unwrap();
                 let k_parsed = String::from_utf8_lossy(&k_parsed).to_string();
 
-                (SmartString::new(&k_parsed), v.parse::<u64>().unwrap())
+                (TinyString::new(&k_parsed), v.parse::<u64>().unwrap())
             })
             .collect();
         Ok(o)
@@ -70,7 +70,7 @@ fn mkdir_if_needed(path: &str) -> Result<()> {
     Ok(())
 }
 
-fn cache_vocab(vocab: &Vocab, id: &str) -> Result<()> {
+fn cache_vocab(vocab: &VocabIntermidiate, id: &str) -> Result<()> {
     let mut f = std::fs::File::create(
         PathBuf::new()
             .join(VOCAB_CACHE_DIR)
@@ -93,7 +93,7 @@ impl<T: VocabFetcher> VocabLoader<T> {
     pub fn load(&self) -> Result<Vocab> {
         mkdir_if_needed(VOCAB_CACHE_DIR)?;
         Ok(match self.read_cached_vocab() {
-            Ok(x) => x,
+            Ok(x) => x.to_real(),
             Err(e) => {
                 dbg!(&e);
                 let raw = self.x.load_raw()?;
@@ -101,17 +101,17 @@ impl<T: VocabFetcher> VocabLoader<T> {
                 let parsed = self.x.parse(raw)?;
                 let parsed = Vocab::new(parsed);
 
-                cache_vocab(&parsed, T::id())?;
+                cache_vocab(&parsed.to_intermidiate(), T::id())?;
                 parsed
             }
         })
     }
 
-    fn read_cached_vocab(&self) -> Result<Vocab> {
+    fn read_cached_vocab(&self) -> Result<VocabIntermidiate> {
         let mut file = File::open(self.vocab_cache_path())?;
         let mut content = Vec::new();
         file.read_to_end(&mut content)?;
-        let vocab: Vocab = bincode::deserialize(content.as_slice())?;
+        let vocab = bincode::deserialize(content.as_slice())?;
         Ok(vocab)
     }
 
