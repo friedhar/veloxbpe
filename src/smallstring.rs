@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 const SMALLSTRING_CAPACITY: usize = 32;
 
-#[derive(Ord, Eq, PartialEq, PartialOrd, Deserialize, Serialize)]
+#[derive(Ord, Eq, PartialEq, PartialOrd, Deserialize, Serialize, Clone)]
 pub enum SmartString {
     Stack(TinyString),
     Heap(String),
@@ -31,7 +31,7 @@ impl ToString for SmartString {
     }
 }
 
-#[derive(Ord, Eq, PartialEq, PartialOrd, Deserialize, Serialize)]
+#[derive(Ord, Eq, PartialEq, PartialOrd, Deserialize, Serialize, Clone)]
 pub struct TinyString {
     inner: [char; SMALLSTRING_CAPACITY],
     length: usize,

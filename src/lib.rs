@@ -7,7 +7,7 @@ pub mod vocab_loader;
 use bytepair::BytePair;
 use rayon::prelude::*;
 use smallstring::SmartString;
-use vocab::Vocab;
+use vocab::{Bytes2Token, Vocab};
 
 pub struct Tokenizer {
     vocab: Vocab,
@@ -23,29 +23,15 @@ impl Tokenizer {
         // let bytes: Vec<u8> = x.bytes().collect();
         let mut tokens: Vec<u64> = x
             .chars()
-            .filter_map(|c| self.vocab.get(&SmartString::from_char(c)))
+            .filter_map(|c| self.vocab.b2t.get(&SmartString::from_char(c)))
             .map(|x| *x)
             .collect();
 
-        // let mut ix = 0;
-        // while ix < bytes.len() {
-        //     let first = bytes[ix];
-        //     let second = bytes[ix + 1];
-
-        //     // match self.vocab.get(&BytePair::new_pair(first, second)) {
-        //     //     Some(x) => {
-        //     //         ix += 2;
-        //     //         o.push(*x);
-        //     //     }
-        //     //     None => match self.vocab.get(&BytePair::new_single(first)) {
-        //     //         Some(x) => {
-        //     //             ix += 1;
-        //     //             o.push(*x);
-        //     //         }
-        //     //         None => todo!("return err"),
-        //     //     },
-        //     // }
-        // }
+        loop {
+            // for xs in tokens.windows(2) {
+            //     let ctx_left = vocab.xs[0];
+            // }
+        }
 
         tokens
     }
@@ -70,13 +56,13 @@ mod tests {
     #[test]
     pub fn bench_bandwidth_encode() {
         rayon::ThreadPoolBuilder::new()
-            .num_threads(1)
+            .num_threads(2)
             .build_global()
             .unwrap();
         let vocab: VocabLoader<O200kBase> = VocabLoader::<O200kBase>::new();
         let vocab = vocab.load().unwrap();
 
-        let source: String = vocab.iter().map(|(k, _)| k.to_string()).collect();
+        let source: String = vocab.b2t.iter().map(|(k, _)| k.to_string()).collect();
         let size = source.len();
 
         let tokenizer = Tokenizer::new(vocab);

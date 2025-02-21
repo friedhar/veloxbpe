@@ -11,13 +11,13 @@ use crate::{
     base64::base64_decode,
     bytepair::BytePair,
     smallstring::{SmartString, TinyString},
-    vocab::Vocab,
+    vocab::{Bytes2Token, Vocab},
 };
 
 pub trait VocabFetcher {
     fn id() -> &'static str;
     fn load_raw(&self) -> Result<String>;
-    fn parse(&self, x: String) -> Result<Vocab>;
+    fn parse(&self, x: String) -> Result<Bytes2Token>;
 }
 
 pub struct O200kBase {}
@@ -34,9 +34,9 @@ impl VocabFetcher for O200kBase {
         Ok(resp)
     }
 
-    fn parse(&self, x: String) -> Result<Vocab> {
+    fn parse(&self, x: String) -> Result<Bytes2Token> {
         let lines: Vec<&str> = x.split("\n").collect();
-        let o: Vocab = x
+        let o: Bytes2Token = x
             .lines()
             .map(|x| {
                 let mut parts = x.split(" ");
@@ -68,7 +68,7 @@ fn mkdir_if_needed(path: &str) -> Result<()> {
     Ok(())
 }
 
-fn cache_vocab(vocab: &Vocab, id: &str) -> Result<()> {
+fn cache_vocab(vocab: &Bytes2Token, id: &str) -> Result<()> {
     let mut f = std::fs::File::create(
         PathBuf::new()
             .join(VOCAB_CACHE_DIR)
@@ -98,7 +98,7 @@ impl<T: VocabFetcher> VocabLoader<T> {
                 let parsed = self.x.parse(raw)?;
 
                 cache_vocab(&parsed, T::id())?;
-                parsed
+                Vocab::new(parsed)
             }
         })
     }
