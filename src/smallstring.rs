@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
 
-const SMALLSTRING_CAPACITY: usize = 8;
+const SMALLSTRING_CAPACITY: usize = 32;
 
 #[derive(Ord, Eq, PartialEq, PartialOrd, Deserialize, Serialize)]
 pub struct SmallString {
-    inner: [char; 8],
+    inner: [char; SMALLSTRING_CAPACITY],
     length: usize,
 }
 

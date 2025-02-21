@@ -36,11 +36,11 @@ impl VocabFetcher for O200kBase {
             .map(|x| {
                 let mut parts = x.split(" ");
                 let k = parts.next().unwrap();
-                let v = parts.next();
+                let v = parts.next().unwrap();
                 let k_parsed = base64_decode(&k).unwrap();
-                let k_parsed = String::from_utf8_lossy(&k_parsed);
+                let k_parsed = String::from_utf8_lossy(&k_parsed).to_string();
 
-                (SmallString::new(&k_parsed), 0)
+                (k_parsed, v.parse::<u64>().unwrap())
             })
             .collect();
         Ok(o)
@@ -86,7 +86,8 @@ impl<T: VocabFetcher> VocabLoader<T> {
         mkdir_if_needed(VOCAB_CACHE_DIR)?;
         Ok(match self.read_cached_vocab() {
             Ok(x) => x,
-            Err(_) => {
+            Err(e) => {
+                dbg!(&e);
                 let raw = self.x.load_raw()?;
 
                 let parsed = self.x.parse(raw)?;
@@ -98,8 +99,8 @@ impl<T: VocabFetcher> VocabLoader<T> {
     }
 
     fn read_cached_vocab(&self) -> Result<Vocab> {
-        let content = std::fs::read_to_string(self.vocab_cache_path())?;
-        let vocab: Vocab = bincode::deserialize(content.as_bytes())?;
+        let content = std::fs::read(self.vocab_cache_path())?;
+        let vocab: Vocab = bincode::deserialize(content.as_slice())?;
         Ok(vocab)
     }
 
