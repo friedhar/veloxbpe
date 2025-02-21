@@ -1,4 +1,9 @@
-use std::{collections::BTreeMap, path::Path, time::Duration};
+use std::{
+    collections::BTreeMap,
+    io::Write,
+    path::{Path, PathBuf},
+    time::Duration,
+};
 
 use anyhow::Result;
 
@@ -45,10 +50,14 @@ fn mkdir_if_needed(path: &str) -> Result<()> {
     Ok(())
 }
 
-fn read_cached_vocab(path: &Path) -> Result<Vocab> {
-    let content = std::fs::read_to_string(path)?;
-    let vocab: Vocab = bincode::deserialize(content.as_bytes())?;
-    Ok(Vocab::new())
+fn cache_vocab(vocab: &Vocab, id: &str) -> Result<()> {
+    let mut f = std::fs::File::create(
+        PathBuf::new()
+            .join(VOCAB_CACHE_DIR)
+            .join(format!("{id}.veloxbpe")),
+    )?;
+    f.write_all(bincode::serialize(&vocab)?.as_slice())?;
+    Ok(())
 }
 
 pub const VOCAB_CACHE_DIR: &str = ".veloxbpe";
@@ -56,13 +65,26 @@ pub const VOCAB_CACHE_DIR: &str = ".veloxbpe";
 impl<T: VocabFetcher> VocabLoader<T> {
     pub fn load(&self) -> Result<Vocab> {
         mkdir_if_needed(VOCAB_CACHE_DIR)?;
-        match read_cached_vocab() {
+        Ok(match self.read_cached_vocab() {
             Ok(x) => x,
             Err(_) => {
                 let raw = self.x.load_raw()?;
-                let parsed = self.x.parse(&raw);
+                let parsed = self.x.parse(raw)?;
+                cache_vocab(&parsed, T::id())?;
+                parsed
             }
-        }
-        Ok(BTreeMap::new())
+        })
+    }
+
+    fn read_cached_vocab(&self) -> Result<Vocab> {
+        let content = std::fs::read_to_string(self.vocab_cache_path())?;
+        let vocab: Vocab = bincode::deserialize(content.as_bytes())?;
+        Ok(vocab)
+    }
+
+    fn vocab_cache_path(&self) -> PathBuf {
+        PathBuf::new()
+            .join(VOCAB_CACHE_DIR)
+            .join(format!("{}.veloxbpe", T::id()))
     }
 }
