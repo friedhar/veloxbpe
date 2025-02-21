@@ -1,7 +1,4 @@
+use crate::bytepair::BytePair;
 use std::collections::BTreeMap;
 
-use crate::bytepair::BytePair;
-
-pub struct Vocab {
-    inner: BTreeMap<BytePair, u64>,
-}
+pub type Vocab = BTreeMap<BytePair, u64>;

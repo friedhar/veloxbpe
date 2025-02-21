@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
-use crate::bytepair::BytePair;
+use crate::{bytepair::BytePair, vocab::Vocab};
 
 pub trait VocabLoader {
-    fn load(&self) -> BTreeMap<BytePair, u64>;
+    fn load(&self) -> Vocab;
 }

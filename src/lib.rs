@@ -1,17 +1,16 @@
-use std::collections::{BTreeMap, HashMap};
-
-use bytepair::BytePair;
-
 pub mod bytepair;
 pub mod vocab;
 pub mod vocab_loader;
 
+use bytepair::BytePair;
+use vocab::Vocab;
+
 pub struct Tokenizer {
-    vocab: BTreeMap<BytePair, u64>,
+    vocab: Vocab,
 }
 
 impl Tokenizer {
-    pub fn new(vocab: BTreeMap<BytePair, u64>) -> Tokenizer {
+    pub fn new(vocab: Vocab) -> Tokenizer {
         Tokenizer { vocab }
     }
 
