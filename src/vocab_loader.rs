@@ -30,7 +30,19 @@ impl VocabFetcher for O200kBase {
     }
 
     fn parse(&self, x: String) -> Result<Vocab> {
-        Ok(BTreeMap::new())
+        let lines: Vec<&str> = x.split("\n").collect();
+        let mut o: BTreeMap<BytePair, u64> = BTreeMap::new();
+        let o: BTreeMap<BytePair, u64> = x
+            .lines()
+            .map(|x| {
+                let mut parts = x.split(" ");
+                let k = parts.next();
+                let v = parts.next();
+
+                (BytePair::new_single(0), 0)
+            })
+            .collect();
+        Ok(o)
     }
 
     #[inline]
