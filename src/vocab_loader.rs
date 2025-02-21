@@ -1,11 +1,13 @@
 use std::{
     collections::BTreeMap,
-    io::Write,
+    fs::File,
+    io::{Read, Write},
     path::{Path, PathBuf},
     time::Duration,
 };
 
 use anyhow::Result;
+use rayon::iter::ParallelBridge;
 
 use crate::{
     base64::base64_decode,
@@ -68,13 +70,14 @@ fn mkdir_if_needed(path: &str) -> Result<()> {
     Ok(())
 }
 
-fn cache_vocab(vocab: &Bytes2Token, id: &str) -> Result<()> {
+fn cache_vocab(vocab: &Vocab, id: &str) -> Result<()> {
     let mut f = std::fs::File::create(
         PathBuf::new()
             .join(VOCAB_CACHE_DIR)
             .join(format!("{id}.veloxbpe")),
     )?;
     f.write_all(bincode::serialize(&vocab)?.as_slice())?;
+    println!("cached");
     Ok(())
 }
 
@@ -96,16 +99,23 @@ impl<T: VocabFetcher> VocabLoader<T> {
                 let raw = self.x.load_raw()?;
 
                 let parsed = self.x.parse(raw)?;
+                let parsed = Vocab::new(parsed);
 
                 cache_vocab(&parsed, T::id())?;
-                Vocab::new(parsed)
+                parsed
             }
         })
     }
 
     fn read_cached_vocab(&self) -> Result<Vocab> {
-        let content = std::fs::read(self.vocab_cache_path())?;
+        let mut file = File::open(self.vocab_cache_path())?;
+        let mut content = Vec::new();
+        dbg!("read");
+        file.read_to_end(&mut content)?;
+
+        dbg!("post_read");
         let vocab: Vocab = bincode::deserialize(content.as_slice())?;
+        dbg!("post_read2");
         Ok(vocab)
     }
 

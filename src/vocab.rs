@@ -18,9 +18,11 @@ impl Vocab {
     pub fn new(x: Bytes2Token) -> Vocab {
         let length = x.clone().into_values().max().unwrap();
         dbg!(length);
-        Vocab {
-            b2t: x,
-            t2b: vec![],
+        let mut t2b: Vec<SmartString> = Vec::with_capacity(length as usize);
+        for (k, _) in x.iter() {
+            t2b.push(k.clone());
         }
+
+        Vocab { b2t: x, t2b }
     }
 }

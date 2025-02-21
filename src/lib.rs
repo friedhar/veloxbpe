@@ -28,9 +28,33 @@ impl Tokenizer {
             .collect();
 
         loop {
-            // for xs in tokens.windows(2) {
-            //     let ctx_left = vocab.xs[0];
-            // }
+            let mut new_tokens: Vec<u64> = Vec::with_capacity(tokens.len() / 2);
+            let mut ix = 0;
+            let mut modified = false;
+            while ix + 1 < tokens.len() {
+                let xs = [tokens[ix], tokens[ix + 1]];
+                let ctx_left = self.vocab.t2b[xs[0] as usize].clone();
+                let ctx_right = self.vocab.t2b[xs[0] as usize].clone();
+                let ctx = format!("{}{}", ctx_left.to_string(), ctx_right.to_string());
+                match self.vocab.b2t.get(&SmartString::new(&ctx)) {
+                    Some(x) => {
+                        ix += 2;
+                        new_tokens.push(*x);
+                        modified = true;
+                    }
+                    None => {
+                        ix += 1;
+                        new_tokens.push(xs[0]);
+                        new_tokens.push(xs[1]);
+                    }
+                };
+                // let ctx_left = self.vocab.t2b[xs[0]];
+            }
+
+            tokens = new_tokens;
+            if !modified {
+                break;
+            }
         }
 
         tokens
