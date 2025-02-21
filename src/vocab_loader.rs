@@ -7,7 +7,12 @@ use std::{
 
 use anyhow::Result;
 
-use crate::{base64::base64_decode, bytepair::BytePair, smallstring::SmallString, vocab::Vocab};
+use crate::{
+    base64::base64_decode,
+    bytepair::BytePair,
+    smallstring::{SmartString, TinyString},
+    vocab::Vocab,
+};
 
 pub trait VocabFetcher {
     fn id() -> &'static str;
@@ -40,7 +45,7 @@ impl VocabFetcher for O200kBase {
                 let k_parsed = base64_decode(&k).unwrap();
                 let k_parsed = String::from_utf8_lossy(&k_parsed).to_string();
 
-                (k_parsed, v.parse::<u64>().unwrap())
+                (SmartString::new(&k_parsed), v.parse::<u64>().unwrap())
             })
             .collect();
         Ok(o)

@@ -1,4 +1,7 @@
-use crate::{bytepair::BytePair, smallstring::SmallString};
+use crate::{
+    bytepair::BytePair,
+    smallstring::{SmartString, TinyString},
+};
 use std::{borrow::Cow, collections::BTreeMap};
 
-pub type Vocab = BTreeMap<String, u64>;
+pub type Vocab = BTreeMap<SmartString, u64>;
