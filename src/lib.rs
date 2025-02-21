@@ -7,7 +7,7 @@ pub mod vocab_loader;
 use bytepair::BytePair;
 use rayon::prelude::*;
 use reqwest::redirect::Policy;
-use smallstring::{SmartString, TinyString};
+use smallstring::TinyString;
 use vocab::{Bytes2Token, Vocab};
 
 pub struct Tokenizer {

@@ -12,7 +12,7 @@ use rayon::iter::ParallelBridge;
 use crate::{
     base64::base64_decode,
     bytepair::BytePair,
-    smallstring::{SmartString, TinyString},
+    smallstring::TinyString,
     vocab::{Bytes2Token, Vocab, VocabIntermidiate},
 };
 
