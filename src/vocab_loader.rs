@@ -1,17 +1,14 @@
 use std::{
-    collections::BTreeMap,
     fs::File,
     io::{Read, Write},
-    path::{Path, PathBuf},
+    path::PathBuf,
     time::Duration,
 };
 
 use anyhow::Result;
-use rayon::iter::ParallelBridge;
 
 use crate::{
     base64::base64_decode,
-    bytepair::BytePair,
     smallstring::TinyString,
     vocab::{Bytes2Token, Vocab, VocabIntermidiate},
 };

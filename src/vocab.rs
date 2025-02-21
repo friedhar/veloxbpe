@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use serde_json::StreamDeserializer;
 
 use crate::smallstring::TinyString;
 use std::collections::{BTreeMap, HashMap};

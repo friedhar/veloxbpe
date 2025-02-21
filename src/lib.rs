@@ -4,11 +4,9 @@ pub mod smallstring;
 pub mod vocab;
 pub mod vocab_loader;
 
-use bytepair::BytePair;
 use rayon::prelude::*;
-use reqwest::redirect::Policy;
 use smallstring::TinyString;
-use vocab::{Bytes2Token, Vocab};
+use vocab::Vocab;
 
 pub struct Tokenizer {
     vocab: Vocab,
@@ -20,8 +18,6 @@ impl Tokenizer {
     }
 
     pub fn encode(&self, x: &str) -> Vec<u64> {
-        // let mut o: Vec<u64> = Vec::with_capacity(x.len());
-        // let bytes: Vec<u8> = x.bytes().collect();
         let mut tokens: Vec<u64> = x
             .chars()
             .par_bridge()
@@ -75,8 +71,6 @@ impl Tokenizer {
 #[cfg(test)]
 mod tests {
     use std::{hint::black_box, time::Instant};
-
-    use rayon::iter::IntoParallelRefIterator;
 
     use crate::{vocab_loader::*, Tokenizer};
 
