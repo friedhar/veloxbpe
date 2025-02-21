@@ -6,6 +6,7 @@ pub mod vocab_loader;
 
 use bytepair::BytePair;
 use rayon::prelude::*;
+use reqwest::redirect::Policy;
 use smallstring::SmartString;
 use vocab::{Bytes2Token, Vocab};
 
@@ -27,6 +28,7 @@ impl Tokenizer {
             .map(|x| *x)
             .collect();
         let mut n = 0;
+        let original_length = tokens.len();
 
         loop {
             let mut new_tokens: Vec<u64> = Vec::with_capacity(tokens.len() / 2);
@@ -57,6 +59,12 @@ impl Tokenizer {
                 break;
             }
         }
+
+        println!(
+            "n: {n}, post length: {}, original_length: {original_length}, reduction: {:.2}%",
+            tokens.len(),
+            ((original_length - tokens.len()) as f64 / original_length as f64) * 100.0
+        );
 
         tokens
     }
