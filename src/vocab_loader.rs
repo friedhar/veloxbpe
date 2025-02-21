@@ -7,7 +7,7 @@ use std::{
 
 use anyhow::Result;
 
-use crate::{base64::base64_decode, bytepair::BytePair, vocab::Vocab};
+use crate::{base64::base64_decode, bytepair::BytePair, smallstring::SmallString, vocab::Vocab};
 
 pub trait VocabFetcher {
     fn id() -> &'static str;
@@ -31,16 +31,16 @@ impl VocabFetcher for O200kBase {
 
     fn parse(&self, x: String) -> Result<Vocab> {
         let lines: Vec<&str> = x.split("\n").collect();
-        let mut o: BTreeMap<BytePair, u64> = BTreeMap::new();
-        let o: BTreeMap<BytePair, u64> = x
+        let o: Vocab = x
             .lines()
             .map(|x| {
                 let mut parts = x.split(" ");
                 let k = parts.next().unwrap();
                 let v = parts.next();
-                dbg!(String::from_utf8_lossy(&base64_decode(&k).unwrap()));
+                let k_parsed = base64_decode(&k).unwrap();
+                let k_parsed = String::from_utf8_lossy(&k_parsed);
 
-                (BytePair::new_single(0), 0)
+                (SmallString::new(&k_parsed), 0)
             })
             .collect();
         Ok(o)

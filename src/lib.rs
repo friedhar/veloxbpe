@@ -25,19 +25,19 @@ impl Tokenizer {
             let first = bytes[ix];
             let second = bytes[ix + 1];
 
-            match self.vocab.get(&BytePair::new_pair(first, second)) {
-                Some(x) => {
-                    ix += 2;
-                    o.push(*x);
-                }
-                None => match self.vocab.get(&BytePair::new_single(first)) {
-                    Some(x) => {
-                        ix += 1;
-                        o.push(*x);
-                    }
-                    None => todo!("return err"),
-                },
-            }
+            // match self.vocab.get(&BytePair::new_pair(first, second)) {
+            //     Some(x) => {
+            //         ix += 2;
+            //         o.push(*x);
+            //     }
+            //     None => match self.vocab.get(&BytePair::new_single(first)) {
+            //         Some(x) => {
+            //             ix += 1;
+            //             o.push(*x);
+            //         }
+            //         None => todo!("return err"),
+            //     },
+            // }
         }
 
         o
