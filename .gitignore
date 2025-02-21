@@ -1,9 +1,12 @@
 *
+
+# Repo 
 !.gitignore
 !README.md
 !fuzz/
 !fuzz/**
 
+## Rust
 !Cargo.toml
 !Cargo.lock
 !src/
