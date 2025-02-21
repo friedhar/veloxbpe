@@ -24,10 +24,18 @@ impl Tokenizer {
             let first = bytes[ix];
             let second = bytes[ix + 1];
 
-            let pair = self.vocab.get(&BytePair::new_pair(first, second));
-            if let Some(x) = pair {
-                ix += 2;
-                o.push(*x);
+            match self.vocab.get(&BytePair::new_pair(first, second)) {
+                Some(x) => {
+                    ix += 2;
+                    o.push(*x);
+                }
+                None => match self.vocab.get(&BytePair::new_single(first)) {
+                    Some(x) => {
+                        ix += 1;
+                        o.push(*x);
+                    }
+                    None => todo!("return err"),
+                },
             }
         }
 
