@@ -41,3 +41,14 @@ impl Tokenizer {
         o
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::vocab_loader::{O200kBase, VocabLoader};
+
+    #[test]
+    fn playground0() {
+        let vocab = O200kBase {};
+        let vocab = vocab.load();
+    }
+}
