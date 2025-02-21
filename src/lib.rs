@@ -24,6 +24,8 @@ impl Tokenizer {
         // let bytes: Vec<u8> = x.bytes().collect();
         let mut tokens: Vec<u64> = x
             .chars()
+            .par_bridge()
+            .into_par_iter()
             .filter_map(|c| self.vocab.b2t.get(&SmartString::from_char(c)))
             .map(|x| *x)
             .collect();
@@ -31,15 +33,15 @@ impl Tokenizer {
         let original_length = tokens.len();
 
         loop {
-            let mut new_tokens: Vec<u64> = Vec::with_capacity(tokens.len() / 2);
+            let mut new_tokens: Vec<u64> = Vec::new();
             let mut ix = 0;
             let mut modified = false;
             while ix + 1 < tokens.len() {
                 let xs = [tokens[ix], tokens[ix + 1]];
-                let ctx_left = self.vocab.t2b[xs[0] as usize].clone();
-                let ctx_right = self.vocab.t2b[xs[0] as usize].clone();
-                let ctx = format!("{}{}", ctx_left.to_string(), ctx_right.to_string());
-                match self.vocab.b2t.get(&SmartString::new(&ctx)) {
+                let ctx_left = &self.vocab.t2b[xs[0] as usize];
+                let ctx_right = &self.vocab.t2b[xs[0] as usize];
+                let ctx = SmartString::fuse(&ctx_left, &ctx_right);
+                match self.vocab.b2t.get(&ctx) {
                     Some(x) => {
                         ix += 2;
                         new_tokens.push(*x);
@@ -95,14 +97,14 @@ mod tests {
         let vocab: VocabLoader<O200kBase> = VocabLoader::<O200kBase>::new();
         let vocab = vocab.load().unwrap();
 
-        let source: String = vocab.b2t.iter().map(|(k, _)| k.to_string()).collect();
-        // let source = (&source[..2048]).to_string();
+        let source: String = std::fs::read_to_string("./data/sample0.txt").unwrap();
+        // let source = (&source[..10000]).to_string();
         let size = source.len();
 
         let tokenizer = Tokenizer::new(vocab);
         let start_t = Instant::now();
         black_box(tokenizer.encode(&source));
-        let took_s = start_t.elapsed().as_millis() as f64 / 1000.0;
+        let took_s = start_t.elapsed().as_micros() as f64 / 1e6 as f64;
 
         println!("MB / s: {}", size as f64 / took_s / 1e6);
     }
