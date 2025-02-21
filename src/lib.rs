@@ -19,38 +19,45 @@ impl Tokenizer {
     pub fn encode(&self, x: &str) -> Vec<u64> {
         let mut o: Vec<u64> = Vec::with_capacity(x.len());
         let bytes: Vec<u8> = x.bytes().collect();
+        let mut tokens: Vec<u64> = x
+            .chars()
+            .map(|c| *self.vocab.get(&c.to_string()).unwrap())
+            .collect();
+        dbg!(&tokens);
 
-        let mut ix = 0;
-        while ix < bytes.len() {
-            let first = bytes[ix];
-            let second = bytes[ix + 1];
+        // let mut ix = 0;
+        // while ix < bytes.len() {
+        //     let first = bytes[ix];
+        //     let second = bytes[ix + 1];
 
-            // match self.vocab.get(&BytePair::new_pair(first, second)) {
-            //     Some(x) => {
-            //         ix += 2;
-            //         o.push(*x);
-            //     }
-            //     None => match self.vocab.get(&BytePair::new_single(first)) {
-            //         Some(x) => {
-            //             ix += 1;
-            //             o.push(*x);
-            //         }
-            //         None => todo!("return err"),
-            //     },
-            // }
-        }
+        //     // match self.vocab.get(&BytePair::new_pair(first, second)) {
+        //     //     Some(x) => {
+        //     //         ix += 2;
+        //     //         o.push(*x);
+        //     //     }
+        //     //     None => match self.vocab.get(&BytePair::new_single(first)) {
+        //     //         Some(x) => {
+        //     //             ix += 1;
+        //     //             o.push(*x);
+        //     //         }
+        //     //         None => todo!("return err"),
+        //     //     },
+        //     // }
+        // }
 
-        o
+        tokens
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::vocab_loader::*;
+    use crate::{vocab_loader::*, Tokenizer};
 
     #[test]
     fn playground0() {
         let vocab: VocabLoader<O200kBase> = VocabLoader::<O200kBase>::new();
-        let vocab = vocab.load();
+        let vocab = vocab.load().unwrap();
+        let tokenizer = Tokenizer::new(vocab);
+        dbg!(tokenizer.encode("dfdf"));
     }
 }
