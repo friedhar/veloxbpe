@@ -44,7 +44,7 @@ impl Tokenizer {
 
 #[cfg(test)]
 mod tests {
-    use crate::vocab_loader::{O200kBase, VocabLoader};
+    use crate::vocab_loader::{O200kBase, VocabFetcher};
 
     #[test]
     fn playground0() {
