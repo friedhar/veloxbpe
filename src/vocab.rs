@@ -1,14 +1,8 @@
 use serde::{Deserialize, Serialize};
 use serde_json::StreamDeserializer;
 
-use crate::{
-    bytepair::BytePair,
-    smallstring::{SmartString, TinyString},
-};
-use std::{
-    borrow::Cow,
-    collections::{BTreeMap, HashMap},
-};
+use crate::smallstring::TinyString;
+use std::collections::{BTreeMap, HashMap};
 
 pub type Bytes2Token = HashMap<TinyString, u64>;
 
