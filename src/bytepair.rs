@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-pub(crate) const BYTEPAIR_CAPACITY: usize = 8;
-
 #[derive(Ord, Eq, PartialEq, PartialOrd, Deserialize, Serialize)]
 pub struct BytePair {
     pub byte1: u8,
