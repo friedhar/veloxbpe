@@ -1,3 +1,4 @@
+pub mod base64;
 pub mod bytepair;
 pub mod vocab;
 pub mod vocab_loader;

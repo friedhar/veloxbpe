@@ -7,7 +7,7 @@ use std::{
 
 use anyhow::Result;
 
-use crate::{bytepair::BytePair, vocab::Vocab};
+use crate::{base64::base64_decode, bytepair::BytePair, vocab::Vocab};
 
 pub trait VocabFetcher {
     fn id() -> &'static str;
@@ -36,8 +36,9 @@ impl VocabFetcher for O200kBase {
             .lines()
             .map(|x| {
                 let mut parts = x.split(" ");
-                let k = parts.next();
+                let k = parts.next().unwrap();
                 let v = parts.next();
+                dbg!(String::from_utf8_lossy(&base64_decode(&k).unwrap()));
 
                 (BytePair::new_single(0), 0)
             })
@@ -87,7 +88,9 @@ impl<T: VocabFetcher> VocabLoader<T> {
             Ok(x) => x,
             Err(_) => {
                 let raw = self.x.load_raw()?;
+
                 let parsed = self.x.parse(raw)?;
+
                 cache_vocab(&parsed, T::id())?;
                 parsed
             }
