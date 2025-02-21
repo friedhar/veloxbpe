@@ -21,9 +21,9 @@ impl Tokenizer {
         let bytes: Vec<u8> = x.bytes().collect();
         let mut tokens: Vec<u64> = x
             .chars()
-            .map(|c| *self.vocab.get(&c.to_string()).unwrap())
+            .filter_map(|c| self.vocab.get(&c.to_string()))
+            .map(|x| *x)
             .collect();
-        dbg!(&tokens);
 
         // let mut ix = 0;
         // while ix < bytes.len() {
@@ -51,6 +51,8 @@ impl Tokenizer {
 
 #[cfg(test)]
 mod tests {
+    use std::{hint::black_box, time::Instant};
+
     use crate::{vocab_loader::*, Tokenizer};
 
     #[test]
@@ -59,5 +61,21 @@ mod tests {
         let vocab = vocab.load().unwrap();
         let tokenizer = Tokenizer::new(vocab);
         dbg!(tokenizer.encode("dfdf"));
+    }
+
+    #[test]
+    pub fn bench_bandwidth_encode() {
+        let vocab: VocabLoader<O200kBase> = VocabLoader::<O200kBase>::new();
+        let vocab = vocab.load().unwrap();
+
+        let source: String = vocab.iter().map(|(k, _)| k.to_string()).collect();
+        let size = source.bytes().count();
+
+        let tokenizer = Tokenizer::new(vocab);
+        let start_t = Instant::now();
+        black_box(tokenizer.encode(&source));
+        let took_s = start_t.elapsed().as_millis() as f64 / 1000.0;
+
+        println!("mega bytes per second: {}", size as f64 / took_s / 1e6);
     }
 }

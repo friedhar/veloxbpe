@@ -101,7 +101,6 @@ impl<T: VocabFetcher> VocabLoader<T> {
     fn read_cached_vocab(&self) -> Result<Vocab> {
         let content = std::fs::read(self.vocab_cache_path())?;
         let vocab: Vocab = bincode::deserialize(content.as_slice())?;
-        dbg!(&vocab);
         Ok(vocab)
     }
 
