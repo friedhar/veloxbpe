@@ -47,6 +47,7 @@ fn mkdir_if_needed(path: &str) -> Result<()> {
 
 fn read_cached_vocab(path: &Path) -> Result<Vocab> {
     let content = std::fs::read_to_string(path)?;
+    let vocab: Vocab = bincode::deserialize(content.as_bytes())?;
     Ok(Vocab::new())
 }
 
