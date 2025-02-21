@@ -1,7 +1,6 @@
 # Performant Tokenizer - 10x faster than tiktoken (hopefully)
 
 volexbpe is a low latency high throughput Byte-Pair encoding derived tokenizer providng exceptional performance & a streamline interface.
-it provides out of the box "vocab loaders" for leading models.
 
 ## Built-In Supported Encodings
 * o200k_base - used in o3, o1, gpt-4o.

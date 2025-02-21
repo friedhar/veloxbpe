@@ -1,1 +1,10 @@
-/target
+*
+!.gitignore
+!README.md
+!fuzz/
+!fuzz/**
+
+!Cargo.toml
+!Cargo.lock
+!src/
+!src/**.rs
