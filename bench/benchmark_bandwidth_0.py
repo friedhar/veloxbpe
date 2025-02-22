@@ -11,10 +11,10 @@ def bench_veloxbpe(source: str):
     tokenizer.encode(source) ## warm up
 
     t0 = time.perf_counter_ns()
-    tokenizer.encode(source) 
+    o = tokenizer.encode(source) 
     t1 = time.perf_counter_ns()
     t_delta = t1-t0
-    return t_delta
+    return t_delta, o
 
 
 def bench_tiktoken(source: str):
@@ -22,10 +22,10 @@ def bench_tiktoken(source: str):
     tokenizer.encode(source) ## warm up
 
     t0 = time.perf_counter_ns()
-    tokenizer.encode(source) 
+    o = tokenizer.encode(source) 
     t1 = time.perf_counter_ns()
     t_delta = t1-t0
-    return t_delta
+    return t_delta, o
 
 
 def setup_plot(x, us, them):
@@ -53,8 +53,16 @@ def main():
     with open("./data/sample0.txt", "r") as f: d=f.read()
     size = len(bytes(d.encode("utf-8")))
 
-    tdelta_veloxbpe = bench_veloxbpe(d) / 1e9
-    tdelta_tiktoken = bench_tiktoken(d) / 1e9
+    tdelta_veloxbpe, output_us = bench_veloxbpe(d) 
+    tdelta_tiktoken, output_them = bench_tiktoken(d)
+    tdelta_veloxbpe, tdelta_tiktoken = tdelta_veloxbpe / 1e9, tdelta_tiktoken / 1e9 ## ns => s
+    print(len(output_us))
+    print()
+    print()
+    print()
+    print()
+    print(len(output_them))
+    assert output_us == output_them
 
     n = 100_000_000
     bandwidth_veloxbpe_v = []
@@ -79,9 +87,9 @@ def main():
     print("-"*64)
 
 
-    x = [1, 2]
-    veloxbpe_throughput = np.array([mean_veloxbpe/1e6, 2.0*mean_veloxbpe/1e6])
-    tiktoken_throughput = np.array([mean_tiktoken/1e6, 2.0*mean_tiktoken/1e6])
+    x = [1]
+    veloxbpe_throughput = np.array([mean_veloxbpe/1e6])
+    tiktoken_throughput = np.array([mean_tiktoken/1e6])
 
     if PLOT:
         setup_plot(x, us=veloxbpe_throughput, them=tiktoken_throughput)
