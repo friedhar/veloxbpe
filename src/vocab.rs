@@ -1,10 +1,11 @@
 use pyo3::prelude::*;
+use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 
 use crate::smallstring::TinyString;
 use std::collections::HashMap;
 
-pub type Bytes2Token = HashMap<TinyString, u64>;
+pub type Bytes2Token = FxHashMap<TinyString, u64>;
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct VocabIntermidiate {
@@ -53,7 +54,7 @@ impl VocabIntermidiate {
 #[derive(Clone)]
 #[pyclass]
 pub struct Vocab {
-    pub b2t: HashMap<TinyString, u64>,
+    pub b2t: FxHashMap<TinyString, u64>,
     pub t2b: HashMap<u64, TinyString>,
     pub t2b_seq: Box<[Option<TinyString>]>,
 }
