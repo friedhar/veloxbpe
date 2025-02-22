@@ -7,11 +7,15 @@ use rayon::prelude::*;
 #[pyclass]
 pub struct BpeTokenizer {
     vocab: Vocab,
+    n_workers: usize,
 }
 
 impl BpeTokenizer {
     pub fn new(vocab: Vocab) -> BpeTokenizer {
-        BpeTokenizer { vocab }
+        BpeTokenizer {
+            vocab,
+            n_workers: 1,
+        }
     }
     pub fn encode(&self, x: &str) -> Vec<u64> {
         let mut tokens: Vec<u64> = Vec::with_capacity(x.len());
@@ -23,8 +27,13 @@ impl BpeTokenizer {
         }
 
         let mut n = 0;
-        let original_length = tokens.len();
-        dbg!(self.vocab.t2b.len());
+
+        let batch_size = tokens.len() / self.n_workers;
+        let batch_size = if batch_size > 0 {
+            batch_size
+        } else {
+            tokens.len()
+        };
 
         loop {
             if tokens.len() == 1 {

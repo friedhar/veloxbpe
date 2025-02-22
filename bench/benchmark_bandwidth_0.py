@@ -1,9 +1,13 @@
 from veloxbpe import *
 import tiktoken
 import time
+import matplotlib.pyplot as plt
+import numpy as np
+
+PLOT = True
 
 def bench_veloxbpe(source: str):
-    tokenizer = Tokenizer()
+    tokenizer = Tokenizer("")
     tokenizer.encode(source) ## warm up
 
     t0 = time.perf_counter_ns()
@@ -23,6 +27,25 @@ def bench_tiktoken(source: str):
     t_delta = t1-t0
     return t_delta
 
+
+def setup_plot(x, us, them):
+    width = 0.35  # Bar width
+
+    _, ax = plt.subplots(figsize=(8, 5))
+
+    ax.bar([i - width/2 for i in x], us, width, label="veloxbpe", color="dodgerblue")
+    ax.bar([i + width/2 for i in x], them, width, label="tiktoken", color="limegreen")
+
+    ax.set_xlabel("Thread count", fontsize=12)
+    ax.set_ylabel("Throughput (MB/s)", fontsize=12)
+    ax.set_title("Throughput Comparison", fontsize=14)
+    ax.set_xticks(x)
+    ax.set_xticklabels(x)
+    ax.legend()
+
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.yaxis.grid(True, linestyle="--", alpha=0.6)
 
 
 def main(): 
@@ -44,13 +67,25 @@ def main():
         bandwidth_veloxbpe_v.append(bandwidth_veloxbpe)
         bandwidth_tiktoken_v.append(bandwidth_tiktoken)
 
-    mean_veloxbpe = sum(bandwidth_veloxbpe_v) / n
-    mean_tiktoken = sum(bandwidth_tiktoken_v) / n
+
+    bandwidth_tiktoken_v, bandwidth_veloxbpe_v = np.array(bandwidth_tiktoken_v), np.array(bandwidth_veloxbpe_v)
+
+    mean_veloxbpe =  bandwidth_veloxbpe_v.mean()
+    mean_tiktoken =bandwidth_tiktoken_v.mean() 
 
     print("-"*16 + " CPU: 1 " + "-" * 40)
     print(f"bandwidth :: veloxbpe = {round(mean_veloxbpe / 1e6, 2)} MB/s avg over {n / 1e6}M iterations")
     print(f"bandwidth :: tiktoken = {round(mean_tiktoken / 1e6, 2)} MB/s avg over {n / 1e6}M iterations")
     print("-"*64)
+
+
+    x = [1, 2]
+    veloxbpe_throughput = np.array([mean_veloxbpe/1e6, 2.0*mean_veloxbpe/1e6])
+    tiktoken_throughput = np.array([mean_tiktoken/1e6, 2.0*mean_tiktoken/1e6])
+
+    if PLOT:
+        setup_plot(x, us=veloxbpe_throughput, them=tiktoken_throughput)
+        plt.show()
 
 
 
