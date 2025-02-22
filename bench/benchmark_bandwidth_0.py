@@ -3,11 +3,11 @@ import tiktoken
 import time
 
 def bench_veloxbpe(source: str):
-    tokenizer = tokenizer_for_vocab("o200k_base")
-    tokenizer.py_encode(source) ## warm up
+    tokenizer = Tokenizer()
+    tokenizer.encode(source) ## warm up
 
     t0 = time.perf_counter_ns()
-    tokenizer.py_encode(source) 
+    tokenizer.encode(source) 
     t1 = time.perf_counter_ns()
     t_delta = t1-t0
     return t_delta

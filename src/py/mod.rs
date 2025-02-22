@@ -9,7 +9,7 @@ use crate::{
     vocab_loader::{O200kBase, VocabLoader},
 };
 
-#[pyclass]
+#[pyclass(name = "Tokenizer")]
 pub struct PyTokenizer {
     x: BpeTokenizer,
 }
@@ -44,5 +44,6 @@ impl PyTokenizer {
 #[pymodule]
 fn veloxbpe(m: &Bound<'_, PyModule>) -> PyResult<()> {
     // m.add_function(wrap_pyfunction!(tokenizer_for_vocab, m)?)?;
+    m.add_class::<PyTokenizer>();
     Ok(())
 }
