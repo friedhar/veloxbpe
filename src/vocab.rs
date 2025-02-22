@@ -46,7 +46,7 @@ impl Vocab {
         }
         let t2b: Vec<TinyString> = t2b.into_iter().filter_map(|x| x).collect();
 
-        Vocab { b2t: x, t2b: t2b }
+        Vocab { b2t: x, t2b }
     }
 
     pub(crate) fn to_intermidiate(&self) -> VocabIntermidiate {
