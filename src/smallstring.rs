@@ -2,7 +2,7 @@ use std::hash::{Hash, Hasher};
 
 pub const SMALLSTRING_CAPACITY: usize = 128;
 
-#[derive(Ord, Eq, PartialEq, PartialOrd, Clone)]
+#[derive(Ord, Eq, PartialEq, PartialOrd, Clone, Copy)]
 pub struct TinyString {
     inner: [u8; SMALLSTRING_CAPACITY],
     length: usize,
@@ -30,9 +30,21 @@ impl TinyString {
         for (ix, i) in s.bytes().enumerate() {
             inner[ix] = i;
         }
+
+        {
+            let bytes = &inner[..s.bytes().len()];
+            let v = String::from_utf8_lossy(bytes);
+            assert_eq!(v, s.to_string());
+
+            // dbg!(v);
+            // dbg!(s);
+
+            // dbg!("asserted");
+        }
+
         TinyString {
             inner,
-            length: s.len(),
+            length: s.bytes().len(),
         }
     }
 

@@ -34,7 +34,6 @@ impl VocabFetcher for O200kBase {
     }
 
     fn parse(&self, x: String) -> Result<Bytes2Token> {
-        let lines: Vec<&str> = x.split("\n").collect();
         let o: Bytes2Token = x
             .lines()
             .map(|x| {

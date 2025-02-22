@@ -34,17 +34,31 @@ impl BpeTokenizer {
         let mut n = 0;
         let original_length = tokens.len();
 
-        let mut new_tokens: Vec<u64> = Vec::with_capacity(tokens.len());
+        dbg!(&tokens);
 
         let s_t = Instant::now();
+        dbg!(
+            &self
+                .vocab
+                .t2b
+                .iter()
+                .map(|x| x.to_string())
+                .collect::<Vec<String>>()[66]
+        );
         loop {
+            let mut new_tokens: Vec<u64> = Vec::with_capacity(tokens.len());
             let mut ix = 0;
             let mut modified = false;
+            dbg!(&tokens);
             while ix + 1 < tokens.len() {
                 let xs = [tokens[ix], tokens[ix + 1]];
+                dbg!(xs);
                 let ctx_left = &self.vocab.t2b[xs[0] as usize];
-                let ctx_right = &self.vocab.t2b[xs[0] as usize];
+                let ctx_right = &self.vocab.t2b[xs[1] as usize];
                 let ctx = TinyString::fuse(&ctx_left, &ctx_right);
+                dbg!(ctx_left.to_string());
+                dbg!(ctx_right.to_string());
+                dbg!(ctx.to_string());
                 match self.vocab.b2t.get(&ctx) {
                     Some(x) => {
                         ix += 2;
@@ -60,9 +74,7 @@ impl BpeTokenizer {
 
             n += 1;
 
-            mem::swap(&mut tokens, &mut new_tokens);
-            new_tokens.clear();
-
+            tokens = new_tokens;
             if !modified {
                 break;
             }
@@ -100,29 +112,29 @@ mod tests {
         dbg!(tokenizer.encode("dfdf"));
     }
 
-    #[test]
-    pub fn bench_bandwidth_encode() {
-        // rayon::ThreadPoolBuilder::new()
-        //     .num_threads(2)
-        //     .build_global()
-        //     .unwrap();
+    // #[test]
+    // pub fn bench_bandwidth_encode() {
+    //     // rayon::ThreadPoolBuilder::new()
+    //     //     .num_threads(2)
+    //     //     .build_global()
+    //     //     .unwrap();
 
-        let vocab: VocabLoader<O200kBase> = VocabLoader::<O200kBase>::new();
-        let vocab = vocab.load().unwrap();
+    //     let vocab: VocabLoader<O200kBase> = VocabLoader::<O200kBase>::new();
+    //     let vocab = vocab.load().unwrap();
 
-        let source: String = std::fs::read_to_string("./data/sample0.txt").unwrap();
-        // let source = (&source[..10000]).to_string();
-        let size = source.len();
+    //     let source: String = std::fs::read_to_string("./data/sample0.txt").unwrap();
+    //     // let source = (&source[..10000]).to_string();
+    //     let size = source.len();
 
-        let tokenizer = BpeTokenizer::new(vocab);
+    //     let tokenizer = BpeTokenizer::new(vocab);
 
-        tokenizer.encode(&source);
-        loop {
-            let start_t = Instant::now();
-            black_box(tokenizer.encode(&source));
-            let took_s = start_t.elapsed().as_micros() as f64 / 1e6 as f64;
+    //     tokenizer.encode(&source);
+    //     loop {
+    //         let start_t = Instant::now();
+    //         black_box(tokenizer.encode(&source));
+    //         let took_s = start_t.elapsed().as_micros() as f64 / 1e6 as f64;
 
-            println!("MB / s: {}", size as f64 / took_s / 1e6);
-        }
-    }
+    //         println!("MB / s: {}", size as f64 / took_s / 1e6);
+    //     }
+    // }
 }
