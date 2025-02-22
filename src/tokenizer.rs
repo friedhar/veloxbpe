@@ -15,7 +15,6 @@ impl BpeTokenizer {
     pub fn new(vocab: Vocab) -> BpeTokenizer {
         BpeTokenizer { vocab }
     }
-
     pub fn encode(&self, x: &str) -> Vec<u64> {
         let s_t = Instant::now();
 
@@ -80,11 +79,18 @@ impl BpeTokenizer {
     }
 }
 
+#[pymethods]
+impl BpeTokenizer {
+    pub fn py_encode(&self, x: &str) -> PyResult<Vec<u64>> {
+        Ok(self.encode(x))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::{hint::black_box, time::Instant};
 
-    use crate::{bpe::BpeTokenizer, vocab_loader::*};
+    use crate::{tokenizer::BpeTokenizer, vocab_loader::*};
 
     #[test]
     fn playground0() {

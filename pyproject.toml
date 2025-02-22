@@ -6,6 +6,9 @@ build-backend = "maturin"
 [tool.maturin]
 features = ["pyo3/extension-module"]
 
+[tool.uv]
+cache-keys = [{file = "pyproject.toml"}, {file = "Cargo.toml"}, {file = "**/*.rs"}]
+
 [project]
 name = "veloxbpe"
 version = "0.1.0"

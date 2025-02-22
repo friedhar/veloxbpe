@@ -1,3 +1,4 @@
+use pyo3::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::smallstring::TinyString;
@@ -25,6 +26,7 @@ impl VocabIntermidiate {
 }
 
 #[derive(Clone)]
+#[pyclass]
 pub struct Vocab {
     pub b2t: HashMap<TinyString, u64>,
     pub t2b: Box<[TinyString]>,
