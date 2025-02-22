@@ -1,3 +1,6 @@
+use std::mem;
+use std::time::Instant;
+
 use crate::smallstring::TinyString;
 use crate::vocab::Vocab;
 use rayon::prelude::*;
@@ -12,16 +15,28 @@ impl BpeTokenizer {
     }
 
     pub fn encode(&self, x: &str) -> Vec<u64> {
-        let mut tokens: Vec<u64> = x
-            .chars()
-            .filter_map(|c| self.vocab.b2t.get(&TinyString::from_char(c)))
-            .map(|x| *x)
-            .collect();
+        let s_t = Instant::now();
+
+        let mut tokens: Vec<u64> = Vec::with_capacity(x.len());
+        for c in x.chars() {
+            tokens.push(match self.vocab.b2t.get(&TinyString::from_char(c)) {
+                Some(z) => *z,
+                None => continue,
+            });
+        }
+        // let mut tokens: Vec<u64> = x
+        //     .chars()
+        //     .filter_map(|c| ))
+        //     .map(|x| *x)
+        //     .collect();
+        dbg!(s_t.elapsed());
         let mut n = 0;
         let original_length = tokens.len();
 
+        let mut new_tokens: Vec<u64> = Vec::with_capacity(tokens.len());
+
+        let s_t = Instant::now();
         loop {
-            let mut new_tokens: Vec<u64> = Vec::new();
             let mut ix = 0;
             let mut modified = false;
             while ix + 1 < tokens.len() {
@@ -43,12 +58,15 @@ impl BpeTokenizer {
             }
 
             n += 1;
-            tokens = new_tokens;
+
+            mem::swap(&mut tokens, &mut new_tokens);
+            new_tokens.clear();
 
             if !modified {
                 break;
             }
         }
+        // dbg!(s_t.elapsed());
 
         println!(
             "n: {n}, post length: {}, original_length: {original_length}, reduction: {:.2}%",
@@ -80,6 +98,7 @@ mod tests {
         //     .num_threads(2)
         //     .build_global()
         //     .unwrap();
+
         let vocab: VocabLoader<O200kBase> = VocabLoader::<O200kBase>::new();
         let vocab = vocab.load().unwrap();
 
@@ -88,11 +107,14 @@ mod tests {
         let size = source.len();
 
         let tokenizer = BpeTokenizer::new(vocab);
-        tokenizer.encode(&source);
-        let start_t = Instant::now();
-        black_box(tokenizer.encode(&source));
-        let took_s = start_t.elapsed().as_micros() as f64 / 1e6 as f64;
 
-        println!("MB / s: {}", size as f64 / took_s / 1e6);
+        tokenizer.encode(&source);
+        loop {
+            let start_t = Instant::now();
+            black_box(tokenizer.encode(&source));
+            let took_s = start_t.elapsed().as_micros() as f64 / 1e6 as f64;
+
+            println!("MB / s: {}", size as f64 / took_s / 1e6);
+        }
     }
 }
