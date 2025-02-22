@@ -17,16 +17,6 @@ pub struct VocabIntermidiate {
 
 impl VocabIntermidiate {
     pub(crate) fn to_real(&self) -> Vocab {
-        // let length = self.b2t.clone().into_values().max().unwrap() + 1;
-        // dbg!(length);
-        // let mut t2b: Vec<Option<TinyString>> = Vec::with_capacity(length as usize);
-        // t2b.fill(const { None });
-        // for (k, v) in self.b2t.iter() {
-        //     dbg!(v);
-        //     t2b[*v as usize] = Some(TinyString::new(&k));
-        // }
-        // let t2b: Vec<TinyString> = t2b.into_iter().filter_map(|x| x).collect();
-
         Vocab {
             b2t: self
                 .b2t
@@ -50,7 +40,6 @@ impl Vocab {
         let length = x.clone().into_values().max().unwrap() + 1;
         dbg!(length);
         let mut t2b: Vec<Option<TinyString>> = vec![None; length as usize];
-        // t2b.fill(const { None });
         for (k, v) in x.iter() {
             dbg!(v);
             t2b[*v as usize] = Some(k.clone());
