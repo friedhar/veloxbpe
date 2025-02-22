@@ -29,13 +29,16 @@ impl VocabFetcher for O200kBase {
             .get("https://openaipublic.blob.core.windows.net/encodings/o200k_base.tiktoken")
             .send()?
             .text()?;
-        println!("{}", resp.len());
+        // println!("{}", resp.len());
         Ok(resp)
     }
 
     fn parse(&self, x: String) -> Result<Bytes2Token> {
+        dbg!(x.lines().last());
         let o: Bytes2Token = x
-            .lines()
+            // .lines()
+            .split("\n")
+            .filter(|x| x.len() > 2)
             .map(|x| {
                 let mut parts = x.split(" ");
                 let k = parts.next().unwrap();
@@ -46,6 +49,7 @@ impl VocabFetcher for O200kBase {
                 (TinyString::new(&k_parsed), v.parse::<u64>().unwrap())
             })
             .collect();
+        // println!("parselen: {}", o.len());
         Ok(o)
     }
 
