@@ -14,8 +14,6 @@ impl BpeTokenizer {
     pub fn encode(&self, x: &str) -> Vec<u64> {
         let mut tokens: Vec<u64> = x
             .chars()
-            .par_bridge()
-            .into_par_iter()
             .filter_map(|c| self.vocab.b2t.get(&TinyString::from_char(c)))
             .map(|x| *x)
             .collect();
