@@ -9,12 +9,12 @@ def main():
     d="hello"
 
     st = time.perf_counter_ns() 
-    (tokenizer1.py_encode(d))
+    print(tokenizer1.py_encode(d))
     took = time.perf_counter_ns() -st
 
     print("benchmark: ", took/1000)
     st = time.perf_counter_ns() 
-    (tokenizer2.encode(d))
+    print(tokenizer2.encode(d))
     took = time.perf_counter_ns() -st
     print("benchmark: ", took/1000)
 

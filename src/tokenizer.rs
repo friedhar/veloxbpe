@@ -1,5 +1,6 @@
 use crate::smallstring::TinyString;
 use crate::vocab::Vocab;
+use pyo3::ffi::newfunc;
 use pyo3::prelude::*;
 use rayon::prelude::*;
 
@@ -26,11 +27,22 @@ impl BpeTokenizer {
         dbg!(self.vocab.t2b.len());
 
         loop {
+            if tokens.len() == 1 {
+                break;
+            }
             let mut new_tokens: Vec<u64> = Vec::with_capacity(tokens.len());
             let mut ix = 0;
             let mut modified = false;
+            dbg!(&tokens
+                .iter()
+                .map(|x| self.vocab.t2b.get(&x).unwrap().to_string())
+                .collect::<Vec<String>>());
             // dbg!(&tokens);
-            while ix + 1 < tokens.len() {
+            while ix < tokens.len() {
+                if ix + 1 >= tokens.len() {
+                    new_tokens.push(tokens[ix]);
+                    break;
+                }
                 let xs = [tokens[ix], tokens[ix + 1]];
                 let ctx_left = &self.vocab.t2b.get(&xs[0]).unwrap();
                 let ctx_right = &self.vocab.t2b.get(&xs[1]).unwrap();
@@ -38,6 +50,7 @@ impl BpeTokenizer {
                 match self.vocab.b2t.get(&ctx) {
                     Some(x) => {
                         ix += 2;
+                        dbg!(ctx.to_string());
                         new_tokens.push(*x);
                         modified = true;
                     }
