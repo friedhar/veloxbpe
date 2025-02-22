@@ -69,11 +69,11 @@ impl BpeTokenizer {
             }
         }
 
-        println!(
-            "n: {n}, post length: {}, original_length: {original_length}, reduction: {:.2}%",
-            tokens.len(),
-            ((original_length - tokens.len()) as f64 / original_length as f64) * 100.0
-        );
+        // println!(
+        //     "n: {n}, post length: {}, original_length: {original_length}, reduction: {:.2}%",
+        //     tokens.len(),
+        //     ((original_length - tokens.len()) as f64 / original_length as f64) * 100.0
+        // );
 
         tokens
     }

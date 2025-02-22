@@ -33,7 +33,7 @@ def main():
     tdelta_veloxbpe = bench_veloxbpe(d) / 1e9
     tdelta_tiktoken = bench_tiktoken(d) / 1e9
 
-    n = 1_000_000
+    n = 10_000_000
     bandwidth_veloxbpe_v = []
     bandwidth_tiktoken_v = []
 
