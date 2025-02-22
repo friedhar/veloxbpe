@@ -42,10 +42,10 @@ impl BpeTokenizer {
             let mut new_tokens: Vec<u64> = Vec::with_capacity(tokens.len());
             let mut ix = 0;
             let mut modified = false;
-            // dbg!(&tokens
-            //     .iter()
-            //     .map(|x| self.vocab.t2b.get(&x).unwrap().to_string())
-            //     .collect::<Vec<String>>());
+            dbg!(&tokens
+                .iter()
+                .map(|x| self.vocab.t2b.get(&x).unwrap().to_string())
+                .collect::<Vec<String>>());
             // dbg!(&tokens);
             while ix < tokens.len() {
                 if ix + 1 >= tokens.len() {
@@ -127,7 +127,7 @@ mod tests {
         let tokenizer = BpeTokenizer::new(vocab);
 
         tokenizer.encode(&source);
-        loop {
+        {
             let start_t = Instant::now();
             black_box(tokenizer.encode(&source));
             let took_s = start_t.elapsed().as_micros() as f64 / 1e6 as f64;

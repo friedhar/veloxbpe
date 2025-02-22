@@ -8,7 +8,16 @@ volexbpe is a low latency high throughput Byte-Pair encoding derived tokenizer p
 * r50k_base - majority decreptad.
 * gpt-2 - gpt-2, open source
 
+## Install
+```sh
+pip install veloxbpe
+`
 
+## Build & Install From Source
+```sh
+git clone https://github.com/friedhar/veloxbpe.git
+maturin develop
+```
 
 ## Benchmark 
 > NOTE: Benchmarks are *hard*. there is > 0 chance one of the hundreds of factors were skewed, and thefore provided misleading results. benchmark code is open source and can be run on every machine.
