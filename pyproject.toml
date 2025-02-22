@@ -2,6 +2,10 @@
 requires = ["maturin>=1,<2"]
 build-backend = "maturin"
 
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+
 [project]
 name = "veloxbpe"
 version = "0.1.0"
