@@ -47,8 +47,10 @@ def main():
     mean_veloxbpe = sum(bandwidth_veloxbpe_v) / n
     mean_tiktoken = sum(bandwidth_tiktoken_v) / n
 
-    print(f"bandwidth :: veloxbpe = {round(mean_veloxbpe / 1e6, 2)} MB/s avg over {n} iterations")
-    print(f"bandwidth :: tiktoken = {round(mean_tiktoken / 1e6, 2)} MB/s avg over {n} iterations")
+    print("-"*16 + " CPU: 1 " + "-" * 40)
+    print(f"bandwidth :: veloxbpe = {round(mean_veloxbpe / 1e6, 2)} MB/s avg over {n / 1e6}M iterations")
+    print(f"bandwidth :: tiktoken = {round(mean_tiktoken / 1e6, 2)} MB/s avg over {n / 1e6}M iterations")
+    print("-"*64)
 
 
 
