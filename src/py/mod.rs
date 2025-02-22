@@ -1,4 +1,33 @@
-use pyo3::prelude::*;
+use pyo3::{
+    exceptions::{asyncio::CancelledError, PyRuntimeError},
+    prelude::*,
+};
+
+use crate::{
+    tokenizer::BpeTokenizer,
+    vocab::Vocab,
+    vocab_loader::{O200kBase, VocabLoader},
+};
+
+#[pyclass]
+pub struct PyTokenizer {
+    x: BpeTokenizer,
+}
+
+#[pymethods]
+impl PyTokenizer {
+    #[new]
+    pub fn new() -> PyResult<PyTokenizer> {
+        let vocab: VocabLoader<O200kBase> = VocabLoader::new();
+        let vocab = match vocab.load() {
+            Ok(x) => x,
+            Err(_) => return Err(PyErr::new::<PyRuntimeError, _>("")),
+        };
+        Ok(PyTokenizer {
+            x: BpeTokenizer::new(vocab),
+        })
+    }
+}
 
 // #[pyfunction]
 // fn tokenizer_for_vocab(vocab_name: &str) -> PyResult<BpeTokenizer> {
