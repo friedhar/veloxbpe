@@ -27,6 +27,10 @@ impl PyTokenizer {
             x: BpeTokenizer::new(vocab),
         })
     }
+
+    pub fn encode(&self, x: &str) -> PyResult<Vec<u64>> {
+        Ok(self.x.encode(x))
+    }
 }
 
 // #[pyfunction]
