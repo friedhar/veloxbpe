@@ -11,7 +11,7 @@ volexbpe is a low latency high throughput Byte-Pair encoding derived tokenizer p
 ## Install
 ```sh
 pip install veloxbpe
-`
+```
 
 ## Build & Install From Source
 ```sh
