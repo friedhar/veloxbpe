@@ -3,8 +3,10 @@ use std::time::Instant;
 
 use crate::smallstring::TinyString;
 use crate::vocab::Vocab;
+use pyo3::prelude::*;
 use rayon::prelude::*;
 
+#[pyclass]
 pub struct BpeTokenizer {
     vocab: Vocab,
 }
