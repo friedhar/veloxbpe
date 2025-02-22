@@ -76,10 +76,10 @@ mod tests {
 
     #[test]
     pub fn bench_bandwidth_encode() {
-        rayon::ThreadPoolBuilder::new()
-            .num_threads(2)
-            .build_global()
-            .unwrap();
+        // rayon::ThreadPoolBuilder::new()
+        //     .num_threads(2)
+        //     .build_global()
+        //     .unwrap();
         let vocab: VocabLoader<O200kBase> = VocabLoader::<O200kBase>::new();
         let vocab = vocab.load().unwrap();
 

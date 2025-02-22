@@ -53,12 +53,14 @@ impl TinyString {
     }
 
     pub fn from_char(c: char) -> TinyString {
-        TinyString::new(c.to_string().as_str())
+        let mut inner = [0; SMALLSTRING_CAPACITY];
+        inner[0] = c as u8;
+        TinyString { inner, length: 1 }
     }
 }
 
 impl Hash for TinyString {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        state.write(&self.inner); // Only hashing `id` for simplicity
+        state.write(&self.inner);
     }
 }
