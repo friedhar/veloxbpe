@@ -2,10 +2,7 @@ use pyo3::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::smallstring::TinyString;
-use std::{
-    collections::{BTreeMap, HashMap},
-    mem::MaybeUninit,
-};
+use std::collections::BTreeMap;
 
 pub type Bytes2Token = BTreeMap<TinyString, u64>;
 

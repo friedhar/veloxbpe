@@ -1,5 +1,3 @@
-use std::mem;
-use std::time::Instant;
 
 use crate::smallstring::TinyString;
 use crate::vocab::Vocab;
@@ -76,7 +74,7 @@ impl BpeTokenizer {
 
 #[cfg(test)]
 mod tests {
-    use std::{hint::black_box, time::Instant};
+    
 
     use crate::{tokenizer::BpeTokenizer, vocab_loader::*};
 
