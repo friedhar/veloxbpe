@@ -13,6 +13,8 @@
 !Cargo.lock
 !src/
 !src/**.rs
+!src/py/
+!src/py/**.rs
 
 ## Uv (Python)
 !pyproject.toml
