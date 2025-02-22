@@ -27,7 +27,7 @@ impl VocabIntermidiate {
 #[derive(Clone)]
 pub struct Vocab {
     pub b2t: HashMap<TinyString, u64>,
-    pub t2b: Vec<TinyString>,
+    pub t2b: Box<[TinyString]>,
 }
 
 impl Vocab {
@@ -39,7 +39,10 @@ impl Vocab {
             t2b.push(k.clone());
         }
 
-        Vocab { b2t: x, t2b }
+        Vocab {
+            b2t: x,
+            t2b: t2b.into_boxed_slice(),
+        }
     }
 
     pub(crate) fn to_intermidiate(&self) -> VocabIntermidiate {
