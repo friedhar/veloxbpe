@@ -44,8 +44,9 @@ impl BpeTokenizer {
                     break;
                 }
                 let xs = [tokens[ix], tokens[ix + 1]];
-                let ctx_left = &self.vocab.t2b.get(&xs[0]).unwrap();
-                let ctx_right = &self.vocab.t2b.get(&xs[1]).unwrap();
+
+                let ctx_left = &self.vocab.t2b_seq.get(xs[0] as usize).unwrap().unwrap();
+                let ctx_right = &self.vocab.t2b_seq.get(xs[1] as usize).unwrap().unwrap();
                 let ctx = TinyString::fuse(&ctx_left, &ctx_right);
                 match self.vocab.b2t.get(&ctx) {
                     Some(x) => {

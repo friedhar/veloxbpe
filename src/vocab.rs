@@ -14,6 +14,25 @@ pub struct VocabIntermidiate {
 
 impl VocabIntermidiate {
     pub(crate) fn to_real(&self) -> Vocab {
+        let mut t2b_v: Vec<Option<TinyString>> = Vec::with_capacity(self.b2t.len());
+        let length: usize = *self.t2b.keys().max().unwrap() as usize + 1;
+        dbg!(length);
+        dbg!(self.t2b.len());
+        for _ in 0..length {
+            t2b_v.push(None);
+        }
+
+        for (v, k) in self.t2b.iter() {
+            if *v as usize >= length {
+                panic!()
+            }
+            t2b_v[*v as usize] = Some(TinyString::new(&k));
+        }
+
+        // let prev_len = t2b_v.len();
+        // let t2b_v: Vec<TinyString> = t2b_v.into_iter().filter_map(|x| x).collect();
+        // assert_eq!(prev_len, t2b_v.len());
+
         Vocab {
             b2t: self
                 .b2t
@@ -25,6 +44,8 @@ impl VocabIntermidiate {
                 .iter()
                 .map(|(k, v)| (*k, TinyString::new(&v)))
                 .collect(),
+
+            t2b_seq: t2b_v.into_boxed_slice(),
         }
     }
 }
@@ -34,6 +55,7 @@ impl VocabIntermidiate {
 pub struct Vocab {
     pub b2t: HashMap<TinyString, u64>,
     pub t2b: HashMap<u64, TinyString>,
+    pub t2b_seq: Box<[Option<TinyString>]>,
 }
 
 impl Vocab {
@@ -48,7 +70,11 @@ impl Vocab {
         // let t2b: Vec<TinyString> = t2b.into_iter().filter_map(|x| x).collect();
         let t2b = x.iter().map(|(k, v)| (*v, *k)).collect();
 
-        Vocab { b2t: x, t2b }
+        Vocab {
+            b2t: x,
+            t2b,
+            t2b_seq: Box::new([]),
+        }
     }
 
     pub(crate) fn to_intermidiate(&self) -> VocabIntermidiate {
