@@ -33,10 +33,10 @@ impl BpeTokenizer {
             let mut new_tokens: Vec<u64> = Vec::with_capacity(tokens.len());
             let mut ix = 0;
             let mut modified = false;
-            dbg!(&tokens
-                .iter()
-                .map(|x| self.vocab.t2b.get(&x).unwrap().to_string())
-                .collect::<Vec<String>>());
+            // dbg!(&tokens
+            //     .iter()
+            //     .map(|x| self.vocab.t2b.get(&x).unwrap().to_string())
+            //     .collect::<Vec<String>>());
             // dbg!(&tokens);
             while ix < tokens.len() {
                 if ix + 1 >= tokens.len() {
@@ -50,7 +50,6 @@ impl BpeTokenizer {
                 match self.vocab.b2t.get(&ctx) {
                     Some(x) => {
                         ix += 2;
-                        dbg!(ctx.to_string());
                         new_tokens.push(*x);
                         modified = true;
                     }
