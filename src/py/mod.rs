@@ -17,11 +17,17 @@ pub struct PyTokenizer {
 #[pymethods]
 impl PyTokenizer {
     #[new]
-    pub fn new() -> PyResult<PyTokenizer> {
-        let vocab: VocabLoader<O200kBase> = VocabLoader::new();
-        let vocab = match vocab.load() {
-            Ok(x) => x,
-            Err(_) => return Err(PyErr::new::<PyRuntimeError, _>("")),
+    pub fn new(vocab_name: &str) -> PyResult<PyTokenizer> {
+        let vocab = match vocab_name {
+            "" | "o200k_base" => {
+                let vocab: VocabLoader<O200kBase> = VocabLoader::new();
+                let vocab = match vocab.load() {
+                    Ok(x) => x,
+                    Err(_) => return Err(PyErr::new::<PyRuntimeError, _>("")),
+                };
+                vocab
+            }
+            _ => return Err(PyErr::new::<PyRuntimeError, _>("Vocabulary doesn't exist.")),
         };
         Ok(PyTokenizer {
             x: BpeTokenizer::new(vocab),
