@@ -11,50 +11,69 @@ use rayon::{prelude::*, ThreadBuilder, ThreadPool, ThreadPoolBuilder};
 #[pyclass]
 pub struct BpeTokenizer {
     vocab: Vocab,
-    workers: usize,
+    pool: ThreadPool,
 }
 
 impl BpeTokenizer {
     pub fn new(vocab: Vocab, threads: usize) -> BpeTokenizer {
         BpeTokenizer {
             vocab,
-            workers: threads,
+            pool: ThreadPoolBuilder::new()
+                .num_threads(threads)
+                .build()
+                .unwrap(),
         }
     }
 
     pub fn encode(&self, x: &str) -> Vec<u64> {
-        let xs: Vec<String> = x.split(" ").map(|x| x.to_string()).collect();
-        // let o: Vec<u64> = self
-        //     .pool
-        //     .install(|| xs.map(|x| self.encode_l0(x)).flatten().collect());
-
-        let batch_size = xs.len() / self.workers;
-        let remain = xs.len() % self.workers; // gotta take care of leftover..
-
-        let o = crossbeam::scope(|scope| {
-            let mut handles = Vec::with_capacity(self.workers);
-            for worker in 0..self.workers {
-                let batch = (xs[worker * batch_size..worker * batch_size + batch_size]).to_vec();
-                handles.push(scope.spawn(|_| {
-                    batch
-                        .into_iter()
-                        .map(|x| BpeTokenizer::encode_l0(&self, &x))
-                        .flatten()
-                        .collect()
-                }));
-            }
-
-            let mut o = Vec::new();
-            for handle in handles.into_iter() {
-                let o_i: Vec<u64> = handle.join().unwrap();
-                o.extend(&o_i);
-            }
-            o
-        })
-        .unwrap();
-
-        o
+        x.split(" ")
+            .map(|x| BpeTokenizer::encode_l0(&self, &x))
+            .flatten()
+            .collect()
     }
+
+    pub fn encode_batch(&self, x: &[String]) -> Vec<u64> {
+        self.pool.install(|| {
+            x.into_par_iter()
+                .map(|x| self.encode(x))
+                .flatten()
+                .collect()
+        })
+    }
+
+    // pub fn encode(&self, x: &str) -> Vec<u64> {
+    //     let xs: Vec<String> = x.split(" ").map(|x| x.to_string()).collect();
+    //     // let o: Vec<u64> = self
+    //     //     .pool
+    //     //     .install(|| xs.map(|x| self.encode_l0(x)).flatten().collect());
+
+    //     let batch_size = xs.len() / self.workers;
+    //     let remain = xs.len() % self.workers; // gotta take care of leftover..
+
+    //     let o = crossbeam::scope(|scope| {
+    //         let mut handles = Vec::with_capacity(self.workers);
+    //         for worker in 0..self.workers {
+    //             let batch = (xs[worker * batch_size..worker * batch_size + batch_size]).to_vec();
+    //             handles.push(scope.spawn(|_| {
+    //                 batch
+    //                     .into_iter()
+    //                     .map(|x| BpeTokenizer::encode_l0(&self, &x))
+    //                     .flatten()
+    //                     .collect()
+    //             }));
+    //         }
+
+    //         let mut o = Vec::new();
+    //         for handle in handles.into_iter() {
+    //             let o_i: Vec<u64> = handle.join().unwrap();
+    //             o.extend(&o_i);
+    //         }
+    //         o
+    //     })
+    //     .unwrap();
+
+    //     o
+    // }
     pub fn encode_l0(&self, x: &str) -> Vec<u64> {
         let mut tokens: Vec<u64> = Vec::with_capacity(x.len());
         let mut i = 0;

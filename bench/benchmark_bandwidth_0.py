@@ -9,10 +9,10 @@ PLOT = True
 
 def bench_veloxbpe(source: str, threads: int):
     tokenizer = Tokenizer("", threads)
-    tokenizer.encode(source) ## warm up
+    tokenizer.encode_batch(source) ## warm up
 
     t0 = time.perf_counter_ns()
-    o = tokenizer.encode(source) 
+    o = tokenizer.encode_batch(source) 
     t1 = time.perf_counter_ns()
     t_delta = t1-t0
     return t_delta, o
@@ -54,7 +54,7 @@ def benchmark(documents: List[str], threads: int, size: int):
     bandwidth_tiktoken_v = []
 
     for _ in range(n):
-        tdelta_veloxbpe, _ = bench_veloxbpe("".join(documents), threads=threads) 
+        tdelta_veloxbpe, _ = bench_veloxbpe(documents, threads=threads) 
         tdelta_tiktoken, _ = bench_tiktoken(documents, threads=threads)
         tdelta_veloxbpe, tdelta_tiktoken = tdelta_veloxbpe / 1e9, tdelta_tiktoken / 1e9 ## ns => s
         
@@ -79,7 +79,7 @@ def main():
     documents = [d for _ in range(n)]
 
     # assert output_us == output_them
-    threads = [1,2,4,8]
+    threads = [1,2,3,4]
     us_v = []
     them_v = []
 

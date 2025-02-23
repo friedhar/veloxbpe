@@ -1,6 +1,7 @@
 use pyo3::{
     exceptions::{asyncio::CancelledError, PyRuntimeError},
     prelude::*,
+    types::PyList,
 };
 
 use crate::{
@@ -36,6 +37,10 @@ impl PyTokenizer {
 
     pub fn encode(&self, x: &str) -> PyResult<Vec<u64>> {
         Ok(self.x.encode(x))
+    }
+
+    pub fn encode_batch(&self, x: Vec<String>) -> PyResult<Vec<u64>> {
+        Ok(self.x.encode_batch(&x))
     }
 }
 
