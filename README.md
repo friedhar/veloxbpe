@@ -22,12 +22,7 @@ maturin develop
 ## Benchmark 
 > NOTE: Benchmarks are *hard*. there is > 0 chance one of the hundreds of factors were skewed, and thefore provided misleading results. benchmark code is open source and can be run on every machine.
 
-```
----------------- CPU: 1 ----------------------------------------
-bandwidth :: veloxbpe = 15.25 MB/s avg over 10.0M iterations
-bandwidth :: tiktoken = 11.96 MB/s avg over 10.0M iterations
-----------------------------------------------------------------
-```
+![](assets/benchmark_0.png)
 
 ## TODO - Possible Road Map
 * Add support for custom BPE training.

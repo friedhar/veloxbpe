@@ -33,14 +33,17 @@ def setup_plot(x, us, them):
     width = 0.35  # Bar width
 
     _, ax = plt.subplots(figsize=(8, 5))
+    # x = range(len(us))
 
-    ax.bar([i - width/2 for i in x], us, width, label="veloxbpe", color="dodgerblue")
-    ax.bar([i + width/2 for i in x], them, width, label="tiktoken", color="limegreen")
+    ax.bar([i - width/2 for i in range(len(x))], us, width, label="veloxbpe", color="dodgerblue")
+    ax.bar([i + width/2 for i in range(len(x))], them, width, label="tiktoken", color="limegreen")
 
     ax.set_xlabel("Thread count", fontsize=12)
     ax.set_ylabel("Throughput (MB/s)", fontsize=12)
     ax.set_title("Throughput Comparison", fontsize=14)
-    ax.set_xticks(x)
+    # ax.set_xticks(x)
+
+    x = [0, *x]
     ax.set_xticklabels(x)
     ax.legend()
 
@@ -66,9 +69,9 @@ def benchmark(documents: List[str], threads: int, size: int):
 
     bandwidth_tiktoken_v, bandwidth_veloxbpe_v = np.array(bandwidth_tiktoken_v), np.array(bandwidth_veloxbpe_v)
 
-    mean_veloxbpe =  bandwidth_veloxbpe_v.mean()
-    mean_tiktoken =bandwidth_tiktoken_v.mean() 
-    return mean_veloxbpe, mean_tiktoken
+    veloxbpe =  np.median(bandwidth_veloxbpe_v)
+    tiktoken = np.median(bandwidth_tiktoken_v) 
+    return veloxbpe, tiktoken
 
 def main(): 
     d="hello"
@@ -79,7 +82,7 @@ def main():
     documents = [d for _ in range(n)]
 
     # assert output_us == output_them
-    threads = [1,2,3,4]
+    threads = [1,2,4,8,16,32,64]
     us_v = []
     them_v = []
 
