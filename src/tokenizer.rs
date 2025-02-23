@@ -1,3 +1,4 @@
+use std::str::MatchIndices;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 
@@ -10,17 +11,14 @@ use rayon::{prelude::*, ThreadBuilder, ThreadPool, ThreadPoolBuilder};
 #[pyclass]
 pub struct BpeTokenizer {
     vocab: Vocab,
-    pool: ThreadPool,
+    workers: usize,
 }
 
 impl BpeTokenizer {
     pub fn new(vocab: Vocab, threads: usize) -> BpeTokenizer {
         BpeTokenizer {
             vocab,
-            pool: ThreadPoolBuilder::new()
-                .num_threads(threads)
-                .build()
-                .unwrap(),
+            workers: threads,
         }
     }
 
@@ -30,39 +28,30 @@ impl BpeTokenizer {
         //     .pool
         //     .install(|| xs.map(|x| self.encode_l0(x)).flatten().collect());
 
-        let batch_size = xs.len() / self.pool.current_num_threads();
-        let remain = xs.len() % self.pool.current_num_threads(); // gotta take care of leftover..
-        let mut out: Arc<Mutex<Vec<Vec<u64>>>> =
-            Arc::new(Mutex::new(vec![vec![]; self.pool.current_num_threads()]));
+        let batch_size = xs.len() / self.workers;
+        let remain = xs.len() % self.workers; // gotta take care of leftover..
 
-        let mut ac: Arc<AtomicUsize> = Arc::new(AtomicUsize::new(0));
-        // for (_, i) in xs.chunks(batch_size).enumerate() {
-        let mut ix = 0;
-        while ix < xs.len() {
-            let i = (&xs[ix..ix + batch_size]).to_vec();
-
-            let out_i = Arc::clone(&out);
-            let ac_i = Arc::clone(&ac);
-            self.pool.spawn(move || {
-                ac_i.fetch_add(1, std::sync::atomic::Ordering::Acquire);
-                let mut o: Vec<u64> = Vec::new();
-                for j in i {
-                    o.extend(&vec![]);
-                }
-                out_i.lock().unwrap()[ix] = o;
-                ac_i.fetch_sub(1, Ordering::Relaxed);
-            });
-            ix += batch_size
-        }
-        let o: Vec<u64> = out.lock().unwrap().clone().into_iter().flatten().collect();
-        std::thread::sleep_ms(1);
-        loop {
-            if ac.load(Ordering::Relaxed) == 0 {
-                break;
+        let o = crossbeam::scope(|scope| {
+            let mut handles = Vec::with_capacity(self.workers);
+            for worker in 0..self.workers {
+                let batch = (xs[worker * batch_size..worker * batch_size + batch_size]).to_vec();
+                handles.push(scope.spawn(|_| {
+                    batch
+                        .into_iter()
+                        .map(|x| BpeTokenizer::encode_l0(&self, &x))
+                        .flatten()
+                        .collect()
+                }));
             }
-        }
-        // out;
-        dbg!(o.len());
+
+            let mut o = Vec::new();
+            for handle in handles.into_iter() {
+                let o_i: Vec<u64> = handle.join().unwrap();
+                o.extend(&o_i);
+            }
+            o
+        })
+        .unwrap();
 
         o
     }

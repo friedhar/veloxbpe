@@ -18,3 +18,4 @@ serde_json = "1.0"
 rayon = "1.10.0"
 pyo3 = { version = "=0.22.6", features = ["extension-module"] }
 rustc-hash = "=1.1.0"
+crossbeam = "0.8.4"
