@@ -1,7 +1,7 @@
 use crate::smallstring::TinyString;
 use crate::vocab::Vocab;
 use pyo3::ffi::newfunc;
-use pyo3::prelude::*;
+use pyo3::{prelude::*, PyErrArguments};
 use rayon::prelude::*;
 
 #[pyclass]
@@ -17,75 +17,136 @@ impl BpeTokenizer {
             n_workers: 1,
         }
     }
+
     pub fn encode(&self, x: &str) -> Vec<u64> {
         let mut tokens: Vec<u64> = Vec::with_capacity(x.len());
-        for c in x.chars() {
-            tokens.push(match self.vocab.b2t.get(&TinyString::from_char(c)) {
-                Some(z) => *z,
-                None => continue,
-            });
-        }
+        let mut i = 0;
 
-        let mut n = 0;
+        let cs: Vec<char> = x.chars().collect();
 
-        let batch_size = tokens.len() / self.n_workers;
-        let batch_size = if batch_size > 0 {
-            batch_size
-        } else {
-            tokens.len()
-        };
-
-        loop {
-            if tokens.len() == 1 {
-                break;
-            }
-            let mut new_tokens: Vec<u64> = Vec::with_capacity(tokens.len());
-            let mut ix = 0;
-            let mut modified = false;
-            dbg!(&tokens
-                .iter()
-                .map(|x| self.vocab.t2b.get(&x).unwrap().to_string())
-                .collect::<Vec<String>>());
-            // dbg!(&tokens);
-            while ix < tokens.len() {
-                if ix + 1 >= tokens.len() {
-                    new_tokens.push(tokens[ix]);
+        while i < cs.len() {
+            let mut best_len = 1;
+            let mut best = TinyString::new("");
+            let mut best_token = 0;
+            // let mut best_tokencc= ;
+            for j in i + 1..cs.len() - 1 {
+                let subtxt = &cs[i..j + 1];
+                let length_i = j - i; // always > 0
+                if length_i > 4 {
                     break;
                 }
-                let xs = [tokens[ix], tokens[ix + 1]];
 
-                let ctx_left = &self.vocab.t2b_seq.get(xs[0] as usize).unwrap().unwrap();
-                let ctx_right = &self.vocab.t2b_seq.get(xs[1] as usize).unwrap().unwrap();
-                let ctx = TinyString::fuse(&ctx_left, &ctx_right);
-                match self.vocab.b2t.get(&ctx) {
-                    Some(x) => {
-                        ix += 2;
-                        new_tokens.push(*x);
-                        modified = true;
+                if length_i < best_len {
+                    continue;
+                }
+                match self.vocab.b2t.get(&TinyString::from_chars(subtxt)) {
+                    Some(tid) => {
+                        // println!("new best :: {i} tid: {tid}, length: {length_i}");
+                        best_len = length_i;
+                        best_token = *tid;
                     }
+                    None => {}
+                }
+            }
+
+            if best_len > 1 {
+                i += best_len + 1;
+                // println!("best best, i: {i}, start_char: {}", &x[i - 3..]);
+            } else {
+                best_token = match self.vocab.b2t.get(&TinyString::from_char(cs[i])) {
+                    Some(x) => *x,
                     None => {
-                        ix += 1;
-                        new_tokens.push(xs[0]);
+                        i += 1;
+                        continue;
                     }
                 };
+                i += 1;
             }
 
-            n += 1;
+            tokens.push(best_token);
 
-            tokens = new_tokens;
-            if !modified {
-                break;
-            }
+            // dbg!(&tokens
+            //     .iter()
+            //     .map(|x| self.vocab.t2b.get(&x).unwrap().to_string())
+            //     .collect::<Vec<String>>());
         }
-
-        // println!(
-        //     "n: {n}, post length: {}, original_length: {original_length}, reduction: {:.2}%",
-        //     tokens.len(),
-        //     ((original_length - tokens.len()) as f64 / original_length as f64) * 100.0
-        // );
 
         tokens
     }
+
+    // pub fn encode_old(&self, x: &str) -> Vec<u64> {
+    //     let mut tokens: Vec<u64> = Vec::with_capacity(x.len());
+    //     for c in x.chars() {
+    //         tokens.push(match self.vocab.b2t.get(&TinyString::from_char(c)) {
+    //             Some(z) => *z,
+    //             None => continue,
+    //         });
+    //     }
+
+    //     let mut n = 0;
+
+    //     let batch_size = tokens.len() / self.n_workers;
+    //     let batch_size = if batch_size > 0 {
+    //         batch_size
+    //     } else {
+    //         tokens.len()
+    //     };
+
+    //     // for i in 0..tokens.len() {
+    //     //     for j in i + 1..tokens {}
+    //     // }
+
+    //     loop {
+    //         if tokens.len() == 1 {
+    //             break;
+    //         }
+    //         let mut new_tokens: Vec<u64> = Vec::with_capacity(tokens.len());
+    //         let mut ix = 0;
+    //         let mut modified = false;
+    // dbg!(&tokens
+    //     .iter()
+    //     .map(|x| self.vocab.t2b.get(&x).unwrap().to_string())
+    //     .collect::<Vec<String>>());
+    //         // dbg!(&tokens);
+    //         while ix < tokens.len() {
+    //             if ix + 1 >= tokens.len() {
+    //                 new_tokens.push(tokens[ix]);
+    //                 break;
+    //             }
+    //             let xs = [tokens[ix], tokens[ix + 1]];
+
+    //             let ctx_left = &self.vocab.t2b_seq.get(xs[0] as usize).unwrap().unwrap();
+    //             let ctx_right = &self.vocab.t2b_seq.get(xs[1] as usize).unwrap().unwrap();
+    //             let ctx = TinyString::fuse(&ctx_left, &ctx_right);
+    //             match self.vocab.b2t.get(&ctx) {
+    //                 Some(x) => {
+    //                     ix += 2;
+    //                     new_tokens.push(*x);
+    //                     modified = true;
+    //                 }
+    //                 None => {
+    //                     ix += 1;
+    //                     new_tokens.push(xs[0]);
+    //                 }
+    //             };
+    //         }
+
+    //         n += 1;
+
+    //         tokens = new_tokens;
+    //         if !modified {
+    //             break;
+    //         }
+    //     }
+
+    //     // println!(
+    //     //     "n: {n}, post length: {}, original_length: {original_length}, reduction: {:.2}%",
+    //     //     tokens.len(),
+    //     //     ((original_length - tokens.len()) as f64 / original_length as f64) * 100.0
+    //     // );
+
+    //     tokens
+    // }
 }
 
 #[pymethods]

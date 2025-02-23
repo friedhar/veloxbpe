@@ -69,6 +69,32 @@ impl TinyString {
         inner[0] = c as u8;
         TinyString { inner, length: 1 }
     }
+
+    pub fn from_chars(s: &[char]) -> TinyString {
+        if s.len() > SMALLSTRING_CAPACITY {
+            todo!("retrun Err()");
+        }
+        let mut inner = [0; SMALLSTRING_CAPACITY];
+        for (ix, i) in s.into_iter().enumerate() {
+            inner[ix] = *i as u8;
+        }
+
+        {
+            let bytes = &inner[..s.len()];
+            let v = String::from_utf8_lossy(bytes);
+            // assert_eq!(v, s.to_string());
+
+            // dbg!(v);
+            // dbg!(s);
+
+            // dbg!("asserted");
+        }
+
+        TinyString {
+            inner,
+            length: s.len(),
+        }
+    }
 }
 
 impl Hash for TinyString {
