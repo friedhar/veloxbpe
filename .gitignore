@@ -23,3 +23,5 @@
 !pyproject.toml
 !uv.lock
 
+!.github/
+!.github/**/**
