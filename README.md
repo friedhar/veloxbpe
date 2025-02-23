@@ -1,5 +1,8 @@
 # Faster than OpenAI's Tiktoken
 
+
+![benchmark bar chart](assets/benchmark_0.png)
+
 volexbpe is a low latency high throughput Byte-Pair encoding derived tokenizer providng exceptional performance & streamline interface.
 
 ## Built-In Supported Encodings
@@ -22,7 +25,6 @@ maturin develop
 ## Benchmark 
 > NOTE: Benchmarks are *hard*. there is > 0 chance one of the hundreds of factors were skewed, and thefore provided misleading results. benchmark code is open source and can be run on every machine.
 
-![](assets/benchmark_0.png)
 
 ## TODO - Possible Road Map
 * Add support for custom BPE training.
