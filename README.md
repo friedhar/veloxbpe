@@ -23,7 +23,7 @@ maturin develop
 ```
 
 ## Benchmark 
-> NOTE: Benchmarks are *hard*. there is > 0 chance one of the hundreds of factors were skewed, and thefore provided misleading results. benchmark code is open source and can be run on every machine.
+> NOTE: Benchmarks are *hard*. there is > 0 chance one of the hundreds of factors were skewed, and thefore may unintentionally provided misleading results. benchmark code is open source and can be run on every machine.
 
 
 ## TODO - Possible Road Map
