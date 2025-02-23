@@ -23,8 +23,11 @@ maturin develop
 ```
 
 ## Benchmark 
-> NOTE: Benchmarks are *hard*. there is > 0 chance one of the hundreds of factors were skewed, and thefore may unintentionally provided misleading results. benchmark code is open source and can be run on every machine.
-
+All benchmarks can be run locally.
+After you've built from source, run
+```sh
+uv run bench/benchmark_bandwidth_0.py
+``` 
 
 ## TODO - Possible Road Map
 * Add support for custom BPE training.
