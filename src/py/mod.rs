@@ -1,16 +1,13 @@
-use pyo3::{
-    exceptions::PyRuntimeError,
-    prelude::*,
-};
+use pyo3::{exceptions::PyRuntimeError, prelude::*};
 
 use crate::{
-    tokenizer::BpeTokenizer,
+    tokenizer::Tokenizer,
     vocab_loader::{O200kBase, VocabLoader},
 };
 
 #[pyclass(name = "Tokenizer")]
 pub struct PyTokenizer {
-    x: BpeTokenizer,
+    x: Tokenizer,
 }
 
 #[pymethods]
@@ -29,7 +26,7 @@ impl PyTokenizer {
             _ => return Err(PyErr::new::<PyRuntimeError, _>("Vocabulary doesn't exist.")),
         };
         Ok(PyTokenizer {
-            x: BpeTokenizer::new(vocab, threads),
+            x: Tokenizer::new(vocab, threads),
         })
     }
 
