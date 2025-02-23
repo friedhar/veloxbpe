@@ -1,12 +1,8 @@
-use std::str::MatchIndices;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex};
 
 use crate::smallstring::TinyString;
 use crate::vocab::Vocab;
-use pyo3::ffi::newfunc;
-use pyo3::{prelude::*, PyErrArguments};
-use rayon::{prelude::*, ThreadBuilder, ThreadPool, ThreadPoolBuilder};
+use pyo3::prelude::*;
+use rayon::{prelude::*, ThreadPool, ThreadPoolBuilder};
 
 #[pyclass]
 pub struct BpeTokenizer {

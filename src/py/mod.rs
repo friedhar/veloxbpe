@@ -1,12 +1,10 @@
 use pyo3::{
-    exceptions::{asyncio::CancelledError, PyRuntimeError},
+    exceptions::PyRuntimeError,
     prelude::*,
-    types::PyList,
 };
 
 use crate::{
     tokenizer::BpeTokenizer,
-    vocab::Vocab,
     vocab_loader::{O200kBase, VocabLoader},
 };
 
