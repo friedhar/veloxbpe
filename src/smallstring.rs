@@ -48,6 +48,10 @@ impl TinyString {
         }
     }
 
+    pub fn len(&self) -> usize {
+        self.length
+    }
+
     pub fn fuse(a: &TinyString, b: &TinyString) -> TinyString {
         let mut inner = [0; SMALLSTRING_CAPACITY];
         for (ix, i) in (&a.inner[..a.length]).into_iter().enumerate() {

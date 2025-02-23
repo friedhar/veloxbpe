@@ -46,6 +46,11 @@ impl VocabIntermidiate {
                 .map(|(k, v)| (*k, TinyString::new(&v)))
                 .collect(),
 
+            max_word_len: t2b_v
+                .iter()
+                .map(|x| x.unwrap_or(TinyString::new("")).len())
+                .max()
+                .unwrap(),
             t2b_seq: t2b_v.into_boxed_slice(),
         }
     }
@@ -57,6 +62,7 @@ pub struct Vocab {
     pub b2t: FxHashMap<TinyString, u64>,
     pub t2b: HashMap<u64, TinyString>,
     pub t2b_seq: Box<[Option<TinyString>]>,
+    pub max_word_len: usize,
 }
 
 impl Vocab {
@@ -75,6 +81,7 @@ impl Vocab {
             b2t: x,
             t2b,
             t2b_seq: Box::new([]),
+            max_word_len: 0,
         }
     }
 

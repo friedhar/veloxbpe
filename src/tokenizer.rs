@@ -19,7 +19,7 @@ impl BpeTokenizer {
     }
 
     pub fn encode(&self, x: &str) -> Vec<u64> {
-        let xs: Vec<&str> = x.lines().collect();
+        let xs: Vec<&str> = x.split(" ").collect();
         let mut o = Vec::with_capacity(xs.len());
         for line in xs {
             o.extend(self.encode_l0(line));
@@ -32,7 +32,6 @@ impl BpeTokenizer {
         let mut i = 0;
 
         let cs: Vec<char> = x.chars().collect();
-
         while i < cs.len() {
             let mut best_len = 1;
             let mut best = TinyString::new("");
@@ -41,7 +40,7 @@ impl BpeTokenizer {
             for j in i + 1..cs.len() - 1 {
                 let subtxt = &cs[i..j + 1];
                 let length_i = j - i; // always > 0
-                if length_i > 4 {
+                if length_i >= self.vocab.max_word_len {
                     break;
                 }
 
