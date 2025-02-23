@@ -1,6 +1,4 @@
-
 pub mod base64;
-pub mod bpe_worker;
 pub mod bytepair;
 pub mod py;
 pub mod smallstring;
