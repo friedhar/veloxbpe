@@ -19,11 +19,9 @@ impl BpeTokenizer {
     }
 
     pub fn encode(&self, x: &str) -> Vec<u64> {
-        let xs: Vec<&str> = x.split(" ").collect();
-        let mut o = Vec::with_capacity(xs.len());
-        for line in xs {
-            o.extend(self.encode_l0(line));
-        }
+        let xs = x.split(" ");
+
+        let o: Vec<u64> = xs.map(|x| self.encode_l0(x)).flatten().collect();
 
         vec![]
     }
