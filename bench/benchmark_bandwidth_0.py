@@ -3,11 +3,12 @@ import tiktoken
 import time
 import matplotlib.pyplot as plt
 import numpy as np
+from typing import List
 
 PLOT = True
 
-def bench_veloxbpe(source: str):
-    tokenizer = Tokenizer("")
+def bench_veloxbpe(source: str, threads: int):
+    tokenizer = Tokenizer("", threads)
     tokenizer.encode(source) ## warm up
 
     t0 = time.perf_counter_ns()
@@ -17,12 +18,12 @@ def bench_veloxbpe(source: str):
     return t_delta, o
 
 
-def bench_tiktoken(source: str):
+def bench_tiktoken(documents: List[str], threads: int):
     tokenizer = tiktoken.get_encoding("o200k_base")
-    tokenizer.encode(source) ## warm up
+    tokenizer.encode_batch(documents, num_threads=threads) ## warm up
 
     t0 = time.perf_counter_ns()
-    o = tokenizer.encode(source) 
+    o = tokenizer.encode_batch(documents, num_threads=threads) 
     t1 = time.perf_counter_ns()
     t_delta = t1-t0
     return t_delta, o
@@ -47,56 +48,59 @@ def setup_plot(x, us, them):
     ax.spines["right"].set_visible(False)
     ax.yaxis.grid(True, linestyle="--", alpha=0.6)
 
-
-def main(): 
-    d="hello"
-    with open("./data/sample0.txt", "r") as f: d=f.read()
-    size = len(bytes(d.encode("utf-8")))
-
-    tdelta_veloxbpe, output_us = bench_veloxbpe(d) 
-    tdelta_tiktoken, output_them = bench_tiktoken(d)
-    tdelta_veloxbpe, tdelta_tiktoken = tdelta_veloxbpe / 1e9, tdelta_tiktoken / 1e9 ## ns => s
-    print(len(output_us))
-    print()
-    print()
-    print()
-    print()
-    print(len(output_them))
-    print(output_us)
-    print(output_them)
-    # assert output_us == output_them
-
-    n = 100_000_000
+def benchmark(documents: List[str], threads: int, size: int):
+    n = int(1)
     bandwidth_veloxbpe_v = []
     bandwidth_tiktoken_v = []
 
     for _ in range(n):
+        tdelta_veloxbpe, _ = bench_veloxbpe("".join(documents), threads=threads) 
+        tdelta_tiktoken, _ = bench_tiktoken(documents, threads=threads)
+        tdelta_veloxbpe, tdelta_tiktoken = tdelta_veloxbpe / 1e9, tdelta_tiktoken / 1e9 ## ns => s
+        
         bandwidth_veloxbpe = size / tdelta_veloxbpe
         bandwidth_tiktoken = size / tdelta_tiktoken
 
         bandwidth_veloxbpe_v.append(bandwidth_veloxbpe)
         bandwidth_tiktoken_v.append(bandwidth_tiktoken)
 
-
     bandwidth_tiktoken_v, bandwidth_veloxbpe_v = np.array(bandwidth_tiktoken_v), np.array(bandwidth_veloxbpe_v)
 
     mean_veloxbpe =  bandwidth_veloxbpe_v.mean()
     mean_tiktoken =bandwidth_tiktoken_v.mean() 
+    return mean_veloxbpe, mean_tiktoken
 
-    print("-"*16 + " CPU: 1 " + "-" * 40)
-    print(f"bandwidth :: veloxbpe = {round(mean_veloxbpe / 1e6, 2)} MB/s avg over {n / 1e6}M iterations")
-    print(f"bandwidth :: tiktoken = {round(mean_tiktoken / 1e6, 2)} MB/s avg over {n / 1e6}M iterations")
-    print("-"*64)
+def main(): 
+    d="hello"
+    with open("./data/sample0.txt", "r") as f: d=f.read()
+    n = 128
+    size = len(bytes(d.encode("utf-8")))
+    size = size * n
+    documents = [d for _ in range(n)]
+
+    # assert output_us == output_them
+    threads = [1,2,4,8]
+    us_v = []
+    them_v = []
+
+    for threads_i in threads:
+        us_i, them_i = benchmark(documents, threads=threads_i, size=size)
+        us_v.append(us_i)
+        them_v.append(them_i)
+
+    # print("-"*16 + " CPU: 1 " + "-" * 40)
+    # print(f"bandwidth :: veloxbpe = {round(mean_veloxbpe / 1e6, 2)} MB/s avg over {n / 1e6}M iterations")
+    # print(f"bandwidth :: tiktoken = {round(mean_tiktoken / 1e6, 2)} MB/s avg over {n / 1e6}M iterations")
+    # print("-"*64)
 
 
-    x = [1]
-    veloxbpe_throughput = np.array([mean_veloxbpe/1e6])
-    tiktoken_throughput = np.array([mean_tiktoken/1e6])
+    x = threads
+    veloxbpe_throughput = np.array(us_v) / 1e6
+    tiktoken_throughput = np.array(them_v) / 1e6
 
     if PLOT:
         setup_plot(x, us=veloxbpe_throughput, them=tiktoken_throughput)
         plt.show()
-
 
 
 if __name__ == "__main__":

@@ -17,7 +17,7 @@ pub struct PyTokenizer {
 #[pymethods]
 impl PyTokenizer {
     #[new]
-    pub fn new(vocab_name: &str) -> PyResult<PyTokenizer> {
+    pub fn new(vocab_name: &str, threads: usize) -> PyResult<PyTokenizer> {
         let vocab = match vocab_name {
             "" | "o200k_base" => {
                 let vocab: VocabLoader<O200kBase> = VocabLoader::new();
@@ -30,7 +30,7 @@ impl PyTokenizer {
             _ => return Err(PyErr::new::<PyRuntimeError, _>("Vocabulary doesn't exist.")),
         };
         Ok(PyTokenizer {
-            x: BpeTokenizer::new(vocab),
+            x: BpeTokenizer::new(vocab, threads),
         })
     }
 

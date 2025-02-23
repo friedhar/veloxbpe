@@ -1,40 +1,81 @@
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::{Arc, Mutex};
+
 use crate::smallstring::TinyString;
 use crate::vocab::Vocab;
 use pyo3::ffi::newfunc;
 use pyo3::{prelude::*, PyErrArguments};
-use rayon::prelude::*;
+use rayon::{prelude::*, ThreadBuilder, ThreadPool, ThreadPoolBuilder};
 
 #[pyclass]
 pub struct BpeTokenizer {
     vocab: Vocab,
-    n_workers: usize,
+    pool: ThreadPool,
 }
 
 impl BpeTokenizer {
-    pub fn new(vocab: Vocab) -> BpeTokenizer {
+    pub fn new(vocab: Vocab, threads: usize) -> BpeTokenizer {
         BpeTokenizer {
             vocab,
-            n_workers: 1,
+            pool: ThreadPoolBuilder::new()
+                .num_threads(threads)
+                .build()
+                .unwrap(),
         }
     }
 
     pub fn encode(&self, x: &str) -> Vec<u64> {
-        let xs = x.split(" ");
+        let xs: Vec<String> = x.split(" ").map(|x| x.to_string()).collect();
+        // let o: Vec<u64> = self
+        //     .pool
+        //     .install(|| xs.map(|x| self.encode_l0(x)).flatten().collect());
 
-        let o: Vec<u64> = xs.map(|x| self.encode_l0(x)).flatten().collect();
+        let batch_size = xs.len() / self.pool.current_num_threads();
+        let remain = xs.len() % self.pool.current_num_threads(); // gotta take care of leftover..
+        let mut out: Arc<Mutex<Vec<Vec<u64>>>> =
+            Arc::new(Mutex::new(vec![vec![]; self.pool.current_num_threads()]));
 
-        vec![]
+        let mut ac: Arc<AtomicUsize> = Arc::new(AtomicUsize::new(0));
+        // for (_, i) in xs.chunks(batch_size).enumerate() {
+        let mut ix = 0;
+        while ix < xs.len() {
+            let i = (&xs[ix..ix + batch_size]).to_vec();
+
+            let out_i = Arc::clone(&out);
+            let ac_i = Arc::clone(&ac);
+            self.pool.spawn(move || {
+                ac_i.fetch_add(1, std::sync::atomic::Ordering::Acquire);
+                let mut o: Vec<u64> = Vec::new();
+                for j in i {
+                    o.extend(&vec![]);
+                }
+                out_i.lock().unwrap()[ix] = o;
+                ac_i.fetch_sub(1, Ordering::Relaxed);
+            });
+            ix += batch_size
+        }
+        let o: Vec<u64> = out.lock().unwrap().clone().into_iter().flatten().collect();
+        std::thread::sleep_ms(1);
+        loop {
+            if ac.load(Ordering::Relaxed) == 0 {
+                break;
+            }
+        }
+        // out;
+        dbg!(o.len());
+
+        o
     }
     pub fn encode_l0(&self, x: &str) -> Vec<u64> {
         let mut tokens: Vec<u64> = Vec::with_capacity(x.len());
         let mut i = 0;
 
         let cs: Vec<char> = x.chars().collect();
+
         while i < cs.len() {
             let mut best_len = 1;
-            let mut best = TinyString::new("");
             let mut best_token = 0;
-            // let mut best_tokencc= ;
+
             for j in i + 1..cs.len() - 1 {
                 let subtxt = &cs[i..j + 1];
                 let length_i = j - i; // always > 0
@@ -42,9 +83,6 @@ impl BpeTokenizer {
                     break;
                 }
 
-                if length_i < best_len {
-                    continue;
-                }
                 match self.vocab.b2t.get(&TinyString::from_chars(subtxt)) {
                     Some(tid) => {
                         // println!("new best :: {i} tid: {tid}, length: {length_i}");
@@ -173,7 +211,7 @@ mod tests {
     fn playground0() {
         let vocab: VocabLoader<O200kBase> = VocabLoader::<O200kBase>::new();
         let vocab = vocab.load().unwrap();
-        let tokenizer = BpeTokenizer::new(vocab);
+        let tokenizer = BpeTokenizer::new(vocab, 1);
         dbg!(tokenizer.encode("dfdf"));
     }
 
@@ -191,7 +229,7 @@ mod tests {
         // let source = (&source[..10000]).to_string();
         let size = source.len();
 
-        let tokenizer = BpeTokenizer::new(vocab);
+        let tokenizer = BpeTokenizer::new(vocab, 1);
 
         tokenizer.encode(&source);
         {
