@@ -19,6 +19,15 @@ impl BpeTokenizer {
     }
 
     pub fn encode(&self, x: &str) -> Vec<u64> {
+        let xs: Vec<&str> = x.lines().collect();
+        let mut o = Vec::with_capacity(xs.len());
+        for line in xs {
+            o.extend(self.encode_l0(line));
+        }
+
+        vec![]
+    }
+    pub fn encode_l0(&self, x: &str) -> Vec<u64> {
         let mut tokens: Vec<u64> = Vec::with_capacity(x.len());
         let mut i = 0;
 
