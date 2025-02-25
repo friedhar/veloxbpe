@@ -28,6 +28,8 @@ git clone https://github.com/friedhar/veloxbpe.git
 uv run maturin develop
 ```
 
+will install `veloxbpe` in the local virtual environment.
+
 ## Benchmark 
 All benchmarks can be run locally.
 After you've built from source, run
