@@ -11,15 +11,21 @@ volexbpe is a low latency high throughput Byte-Pair encoding derived tokenizer p
 * r50k_base - majority decreptad.
 * gpt-2 - gpt-2, open source
 
-## Install
-```sh
-pip install veloxbpe
-```
 
 ## Build & Install From Source
+Make sure you have `uv`, if not
+```sh
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+And the Rust toolchain installed, if not
+```sh
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+then
+
 ```sh
 git clone https://github.com/friedhar/veloxbpe.git
-maturin develop
+uv run maturin develop
 ```
 
 ## Benchmark 
